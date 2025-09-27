@@ -1,5 +1,6 @@
 const router = require('express').Router();
-const transporter = require('../services/email.service');
+// const transporter = require('../services/email.service');
+const sendEmail = require('../services/email.service');
 const { LocalRideEntry } = require('../model');
 const { generateBookingConfirmationTemplate } = require('../utils/emailTemplates');
 
@@ -89,33 +90,36 @@ router.get('/api/available-cities', async (req, res) => {
 
 // POST /send-local-email
 router.post('/send-local-email', async (req, res) => {
-  const { email, route, car, traveller } = req.body;
-  if (!email || !route || !car || !traveller) {
-    return res.status(400).json({ error: 'Missing data for email' });
-  }
   
-  // Generate the modern email template
-  const html = generateBookingConfirmationTemplate({
-    serviceType: 'LOCAL',
-    route,
-    car,
-    traveller: {
-      ...traveller,
-      email: email
-    }
-  });
   
   try {
-    await transporter.sendMail({ 
-      from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`, 
+    
+    const { email, route, car, traveller } = req.body;
+    if (!email || !route || !car || !traveller) {
+      return res.status(400).json({ error: 'Missing data for email' });
+    }
+
+    // Generate the modern email template
+    const html = generateBookingConfirmationTemplate({
+      serviceType: 'LOCAL',
+      route,
+      car,
+      traveller: {
+        ...traveller,
+        email: email
+      }
+    });
+
+    console.log("code comes here-->>");
+    await sendEmail({ 
       to: email, 
       subject: '🚖 Local Ride Booking Confirmation', 
       html 
     });
-    res.json({ message: 'Local ride email sent successfully' });
+    return res.json({ message: 'Local ride email sent successfully' });
   } catch (err) { 
     console.error('Email sending error:', err);
-    res.status(500).json({ error: 'Failed to send email' }); 
+    return res.status(500).json({ error: 'Failed to send email' }); 
   }
 });
 
