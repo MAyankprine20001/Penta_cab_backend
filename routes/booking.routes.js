@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const transporter = require('../services/email.service');
+const sendEmail = require('../services/email.service');
 const { BookingRequest } = require('../model');
 const { generateDriverDetailsTemplate, generateDeclineTemplate } = require('../utils/emailTemplates');
 
@@ -55,14 +55,13 @@ router.put('/api/booking-requests/:id/driver-details', async (req, res) => {
       time: bookingRequest.time
     }, driverDetails);
 
-    await transporter.sendMail({
-      from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`,
+    await sendEmail({
       to: bookingRequest.traveller.email,
       subject: "🚖 Your Driver Details - MakeRide",
       html
     });
 
-    res.json({ message: 'Driver details added and email sent successfully', bookingRequest });
+    retrun res.json({ message: 'Driver details added and email sent successfully', bookingRequest });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
@@ -73,13 +72,12 @@ router.post('/api/send-decline-email', async (req, res) => {
     // Generate the modern decline email template
     const html = generateDeclineTemplate(route, reason);
     
-    await transporter.sendMail({ 
-      from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`, 
+    await sendEmail({ 
       to: email, 
       subject: "📝 Booking Update - MakeRide", 
       html 
     });
-    res.json({ message: 'Decline email sent successfully' });
+    return res.json({ message: 'Decline email sent successfully' });
   } catch (err) { res.status(500).json({ error: 'Failed to send decline email' }); }
 });
 
