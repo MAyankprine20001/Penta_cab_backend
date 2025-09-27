@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const transporter = require('../services/email.service');
+const sendEmail = require('../services/email.service');
 const { OutstationEntry } = require('../model');
 const { generateBookingConfirmationTemplate } = require('../utils/emailTemplates');
 
@@ -92,8 +92,7 @@ router.post('/send-route-email', async (req, res) => {
       .filter(c => c.available)
       .map(c => `<li><strong>${c.type.toUpperCase()}</strong>: ₹${c.price}</li>`).join('');
 
-    await transporter.sendMail({
-      from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`,
+    await sendEmail({
       to: email,
       subject: '🚗 New Outstation Route Launched!',
       html: `
@@ -104,7 +103,7 @@ router.post('/send-route-email', async (req, res) => {
         <p>✅ Book now!</p><br/><p><strong>MakeRide Team</strong></p>`
     });
 
-    res.json({ message: 'Email sent successfully' });
+    returnn res.json({ message: 'Email sent successfully' });
   } catch (err) { res.status(500).json({ error: 'Email sending failed' }); }
 });
 
@@ -127,16 +126,16 @@ router.post('/send-intercity-email', async (req, res) => {
       time: new Date().toLocaleTimeString()
     });
     
-    await transporter.sendMail({ 
+    await sendEmail({ 
       from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`, 
       to: email, 
       subject: "🚗 Intercity Booking Confirmation", 
       html 
     });
-    res.json({ message: "Intercity booking email sent successfully" });
+    return res.json({ message: "Intercity booking email sent successfully" });
   } catch (err) { 
     console.error('Email sending error:', err);
-    res.status(500).json({ error: "Email failed to send" }); 
+    return res.status(500).json({ error: "Email failed to send" }); 
   }
 });
 
