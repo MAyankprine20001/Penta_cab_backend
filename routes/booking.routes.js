@@ -61,7 +61,7 @@ router.put('/api/booking-requests/:id/driver-details', async (req, res) => {
       html
     });
 
-    retrun res.json({ message: 'Driver details added and email sent successfully', bookingRequest });
+    return res.json({ message: 'Driver details added and email sent successfully', bookingRequest });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
