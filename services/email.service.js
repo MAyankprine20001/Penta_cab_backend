@@ -1,16 +1,20 @@
 const nodemailer = require('nodemailer');
 
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   port: 587,
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS
+//   },
+//   connectionTimeout: 10000
+// });
+
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
+  service: "SendGrid",
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
+    api_key: process.env.SENDGRID_API_KEY,
   },
-  connectionTimeout: 10000,
-  logger: true,
-  debug: true
 });
 
 module.exports = transporter;
