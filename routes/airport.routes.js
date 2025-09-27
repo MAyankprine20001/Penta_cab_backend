@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const transporter = require('../services/email.service');
+const sendEmail = require('../services/email.service');
 const { AirportEntry } = require('../model');
 const { generateBookingConfirmationTemplate } = require('../utils/emailTemplates');
 
@@ -107,8 +107,7 @@ router.post('/send-airport-email', async (req, res) => {
   try {
     const availableCars = cars.filter(c => c.available)
       .map(c => `<li><strong>${c.type.toUpperCase()}</strong>: ₹${c.price}</li>`).join('');
-    await transporter.sendMail({
-      from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`,
+    await sendEmail({
       to: email,
       subject: '🛫 New Airport Route Now Available!',
       html: `<h2>🛫 New Airport Route: ${route}</h2>
@@ -138,8 +137,7 @@ router.post('/api/send-airport-email', async (req, res) => {
   });
 
   try {
-    await transporter.sendMail({
-      from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`,
+    await sendEmail({
       to: email,
       subject: `🛫 Airport ${serviceType === 'drop' ? 'Drop' : 'Pickup'} Booking Confirmation`,
       html
