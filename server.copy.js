@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { AirportEntry, OutstationEntry, LocalRideEntry, BookingRequest } = require('./model');
 const cors = require('cors');
+const sendEmail = require('./services/email.service');
 require('dotenv').config();
 
 
@@ -90,14 +91,14 @@ app.get('/api/outstation-routes', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    
+
     const routes = await OutstationEntry.find()
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    
+
     const total = await OutstationEntry.countDocuments();
-    
+
     res.json({
       routes,
       pagination: {
@@ -162,7 +163,7 @@ app.get('/api/local-services', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    
+
     let query = {};
     if (req.query.search) {
       query = {
@@ -172,14 +173,14 @@ app.get('/api/local-services', async (req, res) => {
         ]
       };
     }
-    
+
     const services = await LocalRideEntry.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    
+
     const total = await LocalRideEntry.countDocuments(query);
-    
+
     res.json({
       services,
       pagination: {
@@ -244,7 +245,7 @@ app.get('/api/airport-services', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    
+
     let query = {};
     if (req.query.search) {
       query = {
@@ -255,14 +256,14 @@ app.get('/api/airport-services', async (req, res) => {
         ]
       };
     }
-    
+
     const services = await AirportEntry.find(query)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    
+
     const total = await AirportEntry.countDocuments(query);
-    
+
     res.json({
       services,
       pagination: {
@@ -329,26 +330,25 @@ app.post('/send-route-email', async (req, res) => {
   if (!email || !route) return res.status(400).json({ error: 'Missing email or route' });
 
   try {
-  const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+    // const transporter = nodemailer.createTransport({
+    //   service: 'gmail',
+    //   auth: {
+    //     user: process.env.EMAIL_USER,
+    //     pass: process.env.EMAIL_PASS
+    //   }
+    // });
 
-// const { email, route, cars } = req.body; // Make sure to send `cars` too
+    // const { email, route, cars } = req.body; // Make sure to send `cars` too
 
-const availableCars = cars
-  .filter(car => car.available)
-  .map(car => `<li><strong>${car.type.toUpperCase()}</strong>: ₹${car.price}</li>`)
-  .join('');
+    const availableCars = cars
+      .filter(car => car.available)
+      .map(car => `<li><strong>${car.type.toUpperCase()}</strong>: ₹${car.price}</li>`)
+      .join('');
 
-const mailOptions = {
-  from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`,
-  to: email,
-  subject: '🚗 New Outstation Route Launched!',
-  html: `
+    const mailOptions = {
+      to: email,
+      subject: '🚗 New Outstation Route Launched!',
+      html: `
     <h2>🚗 New Outstation Cab Route: ${route}</h2>
     <p>Hello,</p>
     <p>We're excited to announce a new outstation travel route between <strong>${route}</strong>.</p>
@@ -365,10 +365,10 @@ const mailOptions = {
     <p>Thanks,</p>
     <p><strong>MakeRide Team</strong></p>
   `
-};
+    };
 
 
-    await transporter.sendMail(mailOptions);
+    await sendMail(mailOptions);
     res.json({ message: 'Email sent successfully' });
   } catch (err) {
     console.error('Email error:', err);
@@ -377,13 +377,13 @@ const mailOptions = {
 });
 
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// const transporter = nodemailer.createTransport({
+//   service: 'gmail',
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS
+//   }
+// });
 app.post('/send-airport-email', async (req, res) => {
   const { email, route, cars } = req.body;
 
@@ -398,7 +398,6 @@ app.post('/send-airport-email', async (req, res) => {
       .join('');
 
     const mailOptions = {
-      from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: '🛫 New Airport Route Now Available!',
       html: `
@@ -420,7 +419,7 @@ app.post('/send-airport-email', async (req, res) => {
       `
     };
 
-    await transporter.sendMail(mailOptions);
+    await sendEmail(mailOptions);
     res.json({ message: 'Email sent successfully' });
   } catch (err) {
     console.error('Email error:', err);
@@ -552,33 +551,33 @@ app.post('/api/intercity/search', async (req, res) => {
 });
 
 app.post('/api/search-cabs-forairport', async (req, res) => {
-    const { serviceType, airportCity, otherLocation, date, time } = req.body;
+  const { serviceType, airportCity, otherLocation, date, time } = req.body;
 
-    console.log('Received search:', req.body); // ✅ log input
+  console.log('Received search:', req.body); // ✅ log input
 
-    try {
-       const sanitize = str => str.trim().toLowerCase();
+  try {
+    const sanitize = str => str.trim().toLowerCase();
 
-const entry = await AirportEntry.findOne({
-    airportCity: { $regex: new RegExp(`^${sanitize(airportCity)}$`, 'i') },
-    otherLocation: { $regex: new RegExp(`^${sanitize(otherLocation)}$`, 'i') },
-    serviceType
-});
+    const entry = await AirportEntry.findOne({
+      airportCity: { $regex: new RegExp(`^${sanitize(airportCity)}$`, 'i') },
+      otherLocation: { $regex: new RegExp(`^${sanitize(otherLocation)}$`, 'i') },
+      serviceType
+    });
 
 
-        if (!entry) {
-            console.log('No matching entry found');
-            return res.status(404).json({ message: 'No matching cabs found.' });
-        }
-
-        const availableCabs = entry.cars.filter(car => car.available);
-        console.log('Available cabs:', availableCabs); // ✅ log matched cabs
-
-        return res.json({ cabs: availableCabs });
-    } catch (err) {
-        console.error('Error searching cabs:', err);
-        res.status(500).json({ message: 'Server error' });
+    if (!entry) {
+      console.log('No matching entry found');
+      return res.status(404).json({ message: 'No matching cabs found.' });
     }
+
+    const availableCabs = entry.cars.filter(car => car.available);
+    console.log('Available cabs:', availableCabs); // ✅ log matched cabs
+
+    return res.json({ cabs: availableCabs });
+  } catch (err) {
+    console.error('Error searching cabs:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
 });
 
 // allow users to see only the cities where cabs are available in databse of admin
@@ -664,14 +663,20 @@ app.get('/api/available-outstation-cities', async (req, res) => {
 });
 
 
-app.post('/send-local-email', async (req, res) => {
-  const { email, route, car, traveller } = req.body;
+app.post('/api/send-local-email', async (req, res) => {
+  
 
-  if (!email || !route || !car || !traveller) {
-    return res.status(400).json({ error: 'Missing data for email' });
-  }
+  try {
 
-  const htmlContent = `
+    console.log("loggggg-----...");
+
+    const { email, route, car, traveller } = req.body;
+
+    if (!email || !route || !car || !traveller) {
+      return res.status(400).json({ error: 'Missing data for email' });
+    }
+
+    const htmlContent = `
     <h2>🚖 Local Ride Booking</h2>
     <p><strong>Route:</strong> ${route}</p>
     <p><strong>Car Selected:</strong> ${car.type.toUpperCase()} - ₹${car.price}</p>
@@ -689,15 +694,15 @@ app.post('/send-local-email', async (req, res) => {
     <p><strong>MakeRide Team</strong></p>
   `;
 
-  const mailOptions = {
-    from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`,
-    to: email,
-    subject: '🧾 Your Local Ride Booking Confirmation',
-    html: htmlContent
-  };
+    const mailOptions = {
+      to: email,
+      subject: '🧾 Your Local Ride Booking Confirmation',
+      html: htmlContent
+    };
 
-  try {
-    await transporter.sendMail(mailOptions);
+    console.log("code comes heere -->>>...");
+    
+    await sendEmail(mailOptions);
     res.json({ message: 'Local ride email sent' });
   } catch (err) {
     console.error('Email error:', err);
@@ -731,8 +736,7 @@ app.post('/send-intercity-email', async (req, res) => {
       <p><strong>MakeRide Team</strong></p>
     `;
 
-    await transporter.sendMail({
-      from: `"MakeRide" <${process.env.EMAIL_USER}>`,
+    await sendEmail({
       to: email,
       subject: "🚖 Your Intercity Ride is Confirmed!",
       html
@@ -888,8 +892,8 @@ app.post('/api/populate-outstation', async (req, res) => {
     // Insert sample data
     const result = await OutstationEntry.insertMany(sampleOutstationData);
     console.log(`✅ Successfully added ${result.length} outstation routes to database`);
-    
-    res.json({ 
+
+    res.json({
       message: `Successfully populated database with ${result.length} outstation routes`,
       routes: result.map(route => `${route.city1} → ${route.city2} (${route.distance} km)`)
     });
@@ -926,16 +930,15 @@ app.post('/api/send-airport-email', async (req, res) => {
   `;
 
   try {
-    await transporter.sendMail({
-      from: `"MakeRide" <${process.env.EMAIL_USER}>`,
+    await sendEmail({
       to: email,
       subject: `Your Airport Ride Booking`,
       html
     });
-    res.json({ message: 'Email sent' });
+    return res.json({ message: 'Email sent' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Email failed' });
+    return res.status(500).json({ error: 'Email failed' });
   }
 });
 
@@ -946,9 +949,9 @@ app.post('/api/create-booking-request', async (req, res) => {
   try {
     const bookingRequest = new BookingRequest(req.body);
     await bookingRequest.save();
-    res.status(201).json({ 
+    res.status(201).json({
       message: 'Booking request created successfully',
-      bookingId: bookingRequest._id 
+      bookingId: bookingRequest._id
     });
   } catch (err) {
     console.error('Error creating booking request:', err);
@@ -962,14 +965,14 @@ app.get('/api/booking-requests', async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    
+
     const bookingRequests = await BookingRequest.find()
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    
+
     const total = await BookingRequest.countDocuments();
-    
+
     res.json({
       bookingRequests,
       total,
@@ -987,20 +990,20 @@ app.put('/api/booking-requests/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
     const { status, adminNotes } = req.body;
-    
+
     const bookingRequest = await BookingRequest.findByIdAndUpdate(
       id,
       { status, adminNotes },
       { new: true }
     );
-    
+
     if (!bookingRequest) {
       return res.status(404).json({ error: 'Booking request not found' });
     }
-    
-    res.json({ 
+
+    res.json({
       message: 'Booking request status updated successfully',
-      bookingRequest 
+      bookingRequest
     });
   } catch (err) {
     console.error('Error updating booking request status:', err);
@@ -1013,20 +1016,20 @@ app.put('/api/booking-requests/:id/driver-details', async (req, res) => {
   try {
     const { id } = req.params;
     const { driverDetails } = req.body;
-    
+
     const bookingRequest = await BookingRequest.findByIdAndUpdate(
       id,
-      { 
+      {
         driverDetails,
         status: 'driver_sent'
       },
       { new: true }
     );
-    
+
     if (!bookingRequest) {
       return res.status(404).json({ error: 'Booking request not found' });
     }
-    
+
     // Send email to user with driver details
     const html = `
       <h2>🚖 Your Driver Details</h2>
@@ -1045,16 +1048,15 @@ app.put('/api/booking-requests/:id/driver-details', async (req, res) => {
       <p><strong>MakeRide Team</strong></p>
     `;
 
-    await transporter.sendMail({
-      from: `"MakeRide" <${process.env.EMAIL_USER}>`,
+    await sendEmail({
       to: bookingRequest.traveller.email,
       subject: "🚖 Your Driver Details - MakeRide",
       html
     });
-    
-    res.json({ 
+
+    res.json({
       message: 'Driver details added and email sent successfully',
-      bookingRequest 
+      bookingRequest
     });
   } catch (err) {
     console.error('Error adding driver details:', err);
@@ -1066,7 +1068,7 @@ app.put('/api/booking-requests/:id/driver-details', async (req, res) => {
 app.post('/api/send-decline-email', async (req, res) => {
   try {
     const { email, route, reason } = req.body;
-    
+
     const html = `
       <h2>📝 Booking Update</h2>
       <p>We regret to inform you that we are unable to fulfill your booking request at this time.</p>
@@ -1079,13 +1081,12 @@ app.post('/api/send-decline-email', async (req, res) => {
       <p><strong>MakeRide Team</strong></p>
     `;
 
-    await transporter.sendMail({
-      from: `"MakeRide" <${process.env.EMAIL_USER}>`,
+    await sendEmail({
       to: email,
       subject: "📝 Booking Update - MakeRide",
       html
     });
-    
+
     res.json({ message: 'Decline email sent successfully' });
   } catch (err) {
     console.error('Error sending decline email:', err);
