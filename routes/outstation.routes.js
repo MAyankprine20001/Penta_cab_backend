@@ -103,7 +103,7 @@ router.post('/send-route-email', async (req, res) => {
         <p>✅ Book now!</p><br/><p><strong>MakeRide Team</strong></p>`
     });
 
-    returnn res.json({ message: 'Email sent successfully' });
+    return res.json({ message: 'Email sent successfully' });
   } catch (err) { res.status(500).json({ error: 'Email sending failed' }); }
 });
 
