@@ -1,5 +1,6 @@
 const CreateRazorPayInstance = require("../config/razorPay.config");
 const crypto = require("crypto");
+const { BookingRequest } = require("../model");
 require("dotenv").config();
 
 const razorPayInstance = CreateRazorPayInstance();
@@ -62,8 +63,22 @@ exports.createOrder = async (req, res) => {
 
 exports.verifyPayment = async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
-      req.body || {};
+    const { 
+      razorpay_order_id, 
+      razorpay_payment_id, 
+      razorpay_signature,
+      bookingData,
+      selectedPayment,
+      totalFare
+    } = req.body || {};
+
+    console.log("Payment verification request:", {
+      razorpay_order_id,
+      razorpay_payment_id,
+      selectedPayment,
+      totalFare,
+      bookingDataKeys: bookingData ? Object.keys(bookingData) : 'no booking data'
+    });
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({
@@ -96,6 +111,70 @@ exports.verifyPayment = async (req, res) => {
       );
 
     if (ok) {
+      // Calculate payment amounts based on selected payment method
+      let amountPaid = 0;
+      let paymentStatus = 'pending';
+      
+      if (selectedPayment === '20') {
+        amountPaid = Math.round(totalFare * 0.2); // 20% advance
+        paymentStatus = 'partial';
+      } else if (selectedPayment === '100') {
+        amountPaid = totalFare; // 100% advance
+        paymentStatus = 'full';
+      }
+
+      const remainingAmount = totalFare - amountPaid;
+
+      // Create booking request with payment details
+      if (bookingData) {
+        const bookingRequestData = {
+          ...bookingData,
+          paymentMethod: selectedPayment,
+          paymentDetails: {
+            totalFare: totalFare,
+            amountPaid: amountPaid,
+            remainingAmount: remainingAmount,
+            paymentStatus: paymentStatus,
+            razorpayOrderId: razorpay_order_id,
+            razorpayPaymentId: razorpay_payment_id,
+            paymentDate: new Date()
+          }
+        };
+
+        console.log("Creating booking with payment details:", {
+          paymentMethod: selectedPayment,
+          totalFare,
+          amountPaid,
+          remainingAmount,
+          paymentStatus
+        });
+
+        try {
+          const bookingRequest = new BookingRequest(bookingRequestData);
+          await bookingRequest.save();
+          
+          console.log("Booking created successfully:", bookingRequest._id);
+          
+          return res.status(200).json({ 
+            success: true, 
+            message: "Payment verified successfully and booking created",
+            bookingId: bookingRequest._id,
+            paymentDetails: {
+              totalFare,
+              amountPaid,
+              remainingAmount,
+              paymentStatus
+            }
+          });
+        } catch (bookingError) {
+          console.error("Error creating booking:", bookingError);
+          return res.status(500).json({
+            success: false,
+            message: "Payment verified but booking creation failed"
+          });
+        }
+      }
+
       return res
         .status(200)
         .json({ success: true, message: "Payment verified successfully" });

@@ -67,6 +67,16 @@ const bookingRequestSchema = new mongoose.Schema({
     time: String,
     estimatedDistance: String,
     paymentMethod: { type: String, default: '0' }, // 0 for cash, other for advance
+    // Payment details for advance payments
+    paymentDetails: {
+        totalFare: { type: Number, default: 0 },
+        amountPaid: { type: Number, default: 0 },
+        remainingAmount: { type: Number, default: 0 },
+        paymentStatus: { type: String, enum: ['pending', 'partial', 'full'], default: 'pending' },
+        razorpayOrderId: String,
+        razorpayPaymentId: String,
+        paymentDate: Date
+    },
     status: { 
         type: String, 
         enum: ['pending', 'accepted', 'declined', 'driver_sent'], 
