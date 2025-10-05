@@ -3,6 +3,27 @@ const sendEmail = require('../services/email.service');
 const { BookingRequest } = require('../model');
 const { generateDriverDetailsTemplate, generateDeclineTemplate } = require('../utils/emailTemplates');
 
+// Cab type to name mapping
+const getCabName = (cabTypeOrId) => {
+  // Handle both cab type strings and ID strings
+  const cabTypeMapping = {
+    'sedan': 'SEDAN',
+    'suv': 'SUV', 
+    'innova': 'Innova',
+    'crysta': 'INNOVA CRYSTAL'
+  };
+  
+  const cabIdMapping = {
+    '1': 'Innova',
+    '2': 'SEDAN',
+    '3': 'SUV',
+    '4': 'INNOVA CRYSTAL'
+  };
+  
+  // First try ID mapping, then type mapping
+  return cabIdMapping[cabTypeOrId] || cabTypeMapping[cabTypeOrId] || cabTypeOrId;
+};
+
 // POST /api/create-booking-request
 router.post('/api/create-booking-request', async (req, res) => {
   try {
@@ -66,7 +87,7 @@ router.get('/api/booking-requests', async (req, res) => {
       .sort({ createdAt: -1 }).skip(skip).limit(limit);
     const total = await BookingRequest.countDocuments();
 
-    // Add calculated payment information to each booking request
+    // Add calculated payment information and cab name to each booking request
     const bookingRequestsWithPayment = bookingRequests.map(request => {
       const paymentMethod = request.paymentMethod || '0';
       let remainingAmount = 0;
@@ -95,6 +116,10 @@ router.get('/api/booking-requests', async (req, res) => {
           remainingAmount: Math.round(remainingAmount),
           paymentStatus: paymentStatus,
           totalFare: totalFare
+        },
+        cab: {
+          ...(typeof request.cab === 'string' ? { _id: request.cab } : request.cab),
+          name: getCabName(typeof request.cab === 'string' ? request.cab : request.cab?.type)
         }
       };
     });
