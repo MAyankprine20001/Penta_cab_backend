@@ -43,6 +43,7 @@ const LocalRideEntry = mongoose.model('LocalRideEntry', localRideSchema);
 
 // New Booking Request schema for all types of bookings
 const bookingRequestSchema = new mongoose.Schema({
+    bookingId: { type: String, unique: true, required: true },
     serviceType: { type: String, enum: ['AIRPORT', 'LOCAL', 'OUTSTATION'], required: true },
     traveller: {
         name: { type: String, required: true },

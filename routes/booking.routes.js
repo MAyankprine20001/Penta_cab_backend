@@ -3,6 +3,29 @@ const sendEmail = require('../services/email.service');
 const { BookingRequest } = require('../model');
 const { generateDriverDetailsTemplate, generateDeclineTemplate } = require('../utils/emailTemplates');
 
+// Function to generate booking ID in format PcYYYYMMDDNN
+const generateBookingId = async () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  
+  // Get count of bookings for today to generate sequential number
+  const todayStart = new Date(year, now.getMonth(), now.getDate());
+  const todayEnd = new Date(year, now.getMonth(), now.getDate() + 1);
+  
+  const todayBookingsCount = await BookingRequest.countDocuments({
+    createdAt: {
+      $gte: todayStart,
+      $lt: todayEnd
+    }
+  });
+  
+  const sequenceNumber = String(todayBookingsCount + 1).padStart(2, '0');
+  
+  return `Pc${year}${month}${day}${sequenceNumber}`;
+};
+
 // Cab type to name mapping
 const getCabName = (cabTypeOrId) => {
   // Handle both cab type strings and ID strings
@@ -29,6 +52,9 @@ router.post('/api/create-booking-request', async (req, res) => {
   try {
     const bookingData = req.body;
     
+    // Generate unique booking ID
+    const bookingId = await generateBookingId();
+    
     // Calculate payment details based on payment method
     const paymentMethod = bookingData.paymentMethod || '0';
     const totalFare = bookingData.cab?.price || 0;
@@ -46,9 +72,10 @@ router.post('/api/create-booking-request', async (req, res) => {
       paymentStatus = 'full';
     }
     
-    // Add payment details to the booking data
+    // Add payment details and booking ID to the booking data
     const bookingRequestData = {
       ...bookingData,
+      bookingId: bookingId,
       paymentDetails: {
         totalFare: totalFare,
         amountPaid: amountPaid,
@@ -62,6 +89,7 @@ router.post('/api/create-booking-request', async (req, res) => {
     await bookingRequest.save();
     
     console.log("Direct booking created with payment details:", {
+      bookingId,
       paymentMethod,
       totalFare,
       amountPaid,
@@ -69,7 +97,11 @@ router.post('/api/create-booking-request', async (req, res) => {
       paymentStatus
     });
     
-    res.status(201).json({ message: 'Booking request created successfully', bookingId: bookingRequest._id });
+    res.status(201).json({ 
+      message: 'Booking request created successfully', 
+      bookingId: bookingRequest._id,
+      customBookingId: bookingId
+    });
   } catch (err) { 
     console.error("Error creating booking request:", err);
     res.status(400).json({ error: err.message }); 

@@ -5,6 +5,29 @@ require("dotenv").config();
 
 const razorPayInstance = CreateRazorPayInstance();
 
+// Function to generate booking ID in format PcYYYYMMDDNN
+const generateBookingId = async () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  
+  // Get count of bookings for today to generate sequential number
+  const todayStart = new Date(year, now.getMonth(), now.getDate());
+  const todayEnd = new Date(year, now.getMonth(), now.getDate() + 1);
+  
+  const todayBookingsCount = await BookingRequest.countDocuments({
+    createdAt: {
+      $gte: todayStart,
+      $lt: todayEnd
+    }
+  });
+  
+  const sequenceNumber = String(todayBookingsCount + 1).padStart(2, '0');
+  
+  return `Pc${year}${month}${day}${sequenceNumber}`;
+};
+
 // controller
 
 exports.createOrder = async (req, res) => {
@@ -127,8 +150,12 @@ exports.verifyPayment = async (req, res) => {
 
       // Create booking request with payment details
       if (bookingData) {
+        // Generate unique booking ID
+        const customBookingId = await generateBookingId();
+        
         const bookingRequestData = {
           ...bookingData,
+          bookingId: customBookingId,
           paymentMethod: selectedPayment,
           paymentDetails: {
             totalFare: totalFare,
@@ -142,6 +169,7 @@ exports.verifyPayment = async (req, res) => {
         };
 
         console.log("Creating booking with payment details:", {
+          customBookingId,
           paymentMethod: selectedPayment,
           totalFare,
           amountPaid,
@@ -159,6 +187,7 @@ exports.verifyPayment = async (req, res) => {
             success: true, 
             message: "Payment verified successfully and booking created",
             bookingId: bookingRequest._id,
+            customBookingId: customBookingId,
             paymentDetails: {
               totalFare,
               amountPaid,
