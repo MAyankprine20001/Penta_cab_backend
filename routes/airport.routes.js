@@ -120,7 +120,7 @@ router.post('/send-airport-email', async (req, res) => {
 
 // POST /api/send-airport-email (booking confirmation)
 router.post('/api/send-airport-email', async (req, res) => {
-  const { email, route, cab, traveller, date, time, serviceType, otherLocation } = req.body;
+  const { email, route, cab, traveller, date, time, serviceType, otherLocation, bookingId, paymentMethod, totalFare } = req.body;
   if (!email || !cab) return res.status(400).json({ error: 'Missing fields' });
 
   // Generate the modern email template
@@ -133,7 +133,10 @@ router.post('/api/send-airport-email', async (req, res) => {
       email: email
     },
     date,
-    time
+    time,
+    bookingId,
+    paymentMethod,
+    totalFare
   });
 
   try {

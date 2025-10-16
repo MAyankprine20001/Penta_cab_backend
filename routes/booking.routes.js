@@ -185,7 +185,12 @@ router.put('/api/booking-requests/:id/driver-details', async (req, res) => {
     const html = generateDriverDetailsTemplate({
       route: bookingRequest.route,
       date: bookingRequest.date,
-      time: bookingRequest.time
+      time: bookingRequest.time,
+      car: bookingRequest.cab,
+      traveller: bookingRequest.traveller,
+      bookingId: bookingRequest.bookingId,
+      paymentMethod: bookingRequest.paymentMethod,
+      totalFare: bookingRequest.paymentDetails?.totalFare || bookingRequest.cab?.price || 0
     }, driverDetails);
 
     await sendEmail({

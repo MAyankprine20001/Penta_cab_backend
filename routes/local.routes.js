@@ -90,11 +90,8 @@ router.get('/api/available-cities', async (req, res) => {
 
 // POST /send-local-email
 router.post('/send-local-email', async (req, res) => {
-  
-  
   try {
-    
-    const { email, route, car, traveller } = req.body;
+    const { email, route, car, traveller, date, time, bookingId, paymentMethod, totalFare } = req.body;
     if (!email || !route || !car || !traveller) {
       return res.status(400).json({ error: 'Missing data for email' });
     }
@@ -107,7 +104,12 @@ router.post('/send-local-email', async (req, res) => {
       traveller: {
         ...traveller,
         email: email
-      }
+      },
+      date,
+      time,
+      bookingId,
+      paymentMethod,
+      totalFare
     });
 
     console.log("code comes here-->>");

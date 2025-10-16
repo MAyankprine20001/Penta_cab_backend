@@ -109,7 +109,7 @@ router.post('/send-route-email', async (req, res) => {
 
 // POST /send-intercity-email
 router.post('/send-intercity-email', async (req, res) => {
-  const { email, route, cab, traveller } = req.body;
+  const { email, route, cab, traveller, date, time, bookingId, paymentMethod, totalFare } = req.body;
   if (!email || !route || !cab) return res.status(400).json({ error: 'Missing required data' });
   
   try {
@@ -122,8 +122,11 @@ router.post('/send-intercity-email', async (req, res) => {
         ...traveller,
         email: email
       },
-      date: new Date().toLocaleDateString(),
-      time: new Date().toLocaleTimeString()
+      date,
+      time,
+      bookingId,
+      paymentMethod,
+      totalFare
     });
     
     await sendEmail({ 
