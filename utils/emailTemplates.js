@@ -1,5 +1,5 @@
-// Email Template Utility for MakeRide
-// Provides consistent, professional email templates for all booking types
+// Email Template Utility for Penta Cab
+// Fixed version with better email client compatibility
 
 const generateEmailTemplate = (bookingData) => {
   const { type, route, car, traveller, date, time, serviceType } = bookingData;
@@ -43,174 +43,178 @@ const generateEmailTemplate = (bookingData) => {
         }
         
         body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+          font-family: Arial, sans-serif;
           line-height: 1.6;
           color: #333;
-          background-color: #f8f9fa;
+          background-color: #f4f4f4;
+          margin: 0;
+          padding: 20px;
         }
         
         .email-container {
           max-width: 600px;
           margin: 0 auto;
-          background-color: #ffffff;
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          background: #ffffff;
+          border-radius: 10px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
           overflow: hidden;
         }
         
         .email-header {
           background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
           color: white;
-          padding: 24px;
+          padding: 30px 20px;
           text-align: center;
         }
         
-        .email-header h1 {
-          font-size: 24px;
-          font-weight: 600;
-          margin-bottom: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
+        .company-logo {
+          font-size: 28px;
+          font-weight: bold;
+          margin-bottom: 10px;
         }
         
-        .email-header .icon {
-          font-size: 28px;
+        .header-title {
+          font-size: 22px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+        
+        .header-subtitle {
+          font-size: 14px;
+          opacity: 0.9;
         }
         
         .email-body {
-          padding: 32px 24px;
+          padding: 30px 20px;
         }
         
-        .booking-summary {
-          background-color: #f8f9fa;
+        .booking-id-section {
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 20px;
+          border-radius: 8px;
+          text-align: center;
+          margin-bottom: 25px;
+        }
+        
+        .booking-id-label {
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+        
+        .booking-id-value {
+          font-size: 24px;
+          font-weight: bold;
+          font-family: monospace;
+          letter-spacing: 1px;
+        }
+        
+        .info-section {
+          margin-bottom: 20px;
+          background: #f8f9fa;
           border-radius: 8px;
           padding: 20px;
-          margin-bottom: 24px;
           border-left: 4px solid #667eea;
         }
         
-        .route-info {
-          font-size: 18px;
-          font-weight: 600;
-          color: #2c3e50;
-          margin-bottom: 12px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        
-        .car-selection {
-          font-size: 16px;
-          color: #34495e;
-          font-weight: 500;
-        }
-        
-        .divider {
-          height: 1px;
-          background: linear-gradient(to right, transparent, #e0e0e0, transparent);
-          margin: 24px 0;
-        }
-        
-        .traveller-section {
-          margin-bottom: 24px;
-        }
-        
         .section-title {
-          font-size: 18px;
-          font-weight: 600;
-          color: #2c3e50;
-          margin-bottom: 16px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
+          font-size: 16px;
+          font-weight: 700;
+          color: #333;
+          margin-bottom: 15px;
         }
         
-        .traveller-details {
-          display: grid;
-          gap: 12px;
+        .section-icon {
+          font-size: 18px;
+          margin-right: 8px;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: #667eea;
+          color: white;
+          display: inline-block;
+          text-align: center;
+          line-height: 30px;
         }
         
         .detail-row {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          padding: 8px 0;
+          margin-bottom: 10px;
+          padding: 5px 0;
         }
         
         .detail-label {
           font-weight: 600;
-          color: #34495e;
-          min-width: 80px;
+          color: #555;
           font-size: 14px;
+          display: inline-block;
+          width: 120px;
         }
         
         .detail-value {
-          color: #2c3e50;
-          flex: 1;
+          color: #333;
           font-size: 14px;
-          word-break: break-word;
+          font-weight: 500;
+        }
+        
+        .payment-status {
+          background: #28a745;
+          color: white;
+          padding: 12px 16px;
+          border-radius: 6px;
+          text-align: center;
+          font-weight: 600;
+          margin-top: 10px;
         }
         
         .email-footer {
-          background-color: #f8f9fa;
-          padding: 24px;
+          background: #2c3e50;
+          color: white;
+          padding: 25px 20px;
           text-align: center;
-          border-top: 1px solid #e9ecef;
         }
         
-        .company-name {
-          font-weight: 600;
-          color: #667eea;
-          font-size: 16px;
-          margin-bottom: 4px;
+        .footer-logo {
+          font-size: 20px;
+          font-weight: bold;
+          margin-bottom: 8px;
         }
         
-        .tagline {
-          color: #6c757d;
+        .footer-tagline {
           font-size: 14px;
+          margin-bottom: 15px;
+          opacity: 0.9;
         }
         
         .contact-info {
-          margin-top: 16px;
-          font-size: 13px;
-          color: #6c757d;
+          margin-top: 15px;
+          font-size: 12px;
+          opacity: 0.8;
         }
         
-        .highlight {
-          background-color: #fff3cd;
-          border: 1px solid #ffeaa7;
-          border-radius: 4px;
-          padding: 8px 12px;
-          margin: 8px 0;
+        .contact-item {
+          margin: 5px 0;
         }
         
         @media (max-width: 600px) {
-          .email-container {
-            margin: 0;
-            border-radius: 0;
+          body {
+            padding: 10px;
           }
           
-          .email-body {
-            padding: 24px 16px;
+          .email-container {
+            border-radius: 8px;
           }
           
           .email-header {
-            padding: 20px 16px;
+            padding: 25px 15px;
           }
           
-          .email-header h1 {
+          .email-body {
+            padding: 25px 15px;
+          }
+          
+          .booking-id-value {
             font-size: 20px;
-          }
-          
-          .detail-row {
-            flex-direction: column;
-            gap: 4px;
-          }
-          
-          .detail-label {
-            min-width: auto;
           }
         }
       </style>
@@ -218,101 +222,102 @@ const generateEmailTemplate = (bookingData) => {
     <body>
       <div class="email-container">
         <div class="email-header">
-          <h1>
-            <span class="icon">${icon}</span>
-            ${title}
-          </h1>
+          <div class="company-logo">🚗 PENTA CAB</div>
+          <div class="header-title">Booking Confirmed!</div>
+          <div class="header-subtitle">Your ride is ready to go</div>
         </div>
         
         <div class="email-body">
-          <div class="booking-summary">
-            <div class="route-info">
-              <span>📍</span>
-              <span>Route: ${route}</span>
-            </div>
-            <div class="car-selection">
-              <span>🚗</span>
-              <span>${carLabel}: ${car.type.toUpperCase()} - ₹${car.price}</span>
-            </div>
-            ${date && time ? `
-              <div style="margin-top: 12px; font-size: 14px; color: #6c757d;">
-                <span>📅</span>
-                <span>${date} at ${time}</span>
-              </div>
-            ` : ''}
+          <div class="booking-id-section">
+            <div class="booking-id-label">Booking ID</div>
+            <div class="booking-id-value">${bookingData.bookingId || 'N/A'}</div>
           </div>
           
-          <div class="divider"></div>
-          
-          <div class="traveller-section">
-            <h3 class="section-title">
-              <span>👤</span>
-              <span>Traveller Details</span>
-            </h3>
-            
-            <div class="traveller-details">
-              <div class="detail-row">
-                <span class="detail-label">Name:</span>
-                <span class="detail-value">${traveller.name}</span>
-              </div>
-              
-              <div class="detail-row">
-                <span class="detail-label">Mobile:</span>
-                <span class="detail-value">${traveller.mobile}</span>
-              </div>
-              
-              <div class="detail-row">
-                <span class="detail-label">Email:</span>
-                <span class="detail-value">
-                  <a href="mailto:${traveller.email}" style="color: #667eea; text-decoration: none;">
-                    ${traveller.email}
-                  </a>
-                </span>
-              </div>
-              
-              ${traveller.pickup || traveller.pickupAddress ? `
-                <div class="detail-row">
-                  <span class="detail-label">Pickup:</span>
-                  <span class="detail-value">${traveller.pickup || traveller.pickupAddress}</span>
-                </div>
-              ` : ''}
-              
-              ${traveller.drop || traveller.dropAddress ? `
-                <div class="detail-row">
-                  <span class="detail-label">Drop:</span>
-                  <span class="detail-value">${traveller.drop || traveller.dropAddress}</span>
-                </div>
-              ` : ''}
-              
-              ${traveller.remark ? `
-                <div class="detail-row">
-                  <span class="detail-label">Remark:</span>
-                  <span class="detail-value">${traveller.remark}</span>
-                </div>
-              ` : ''}
-              
-              ${traveller.gst ? `
-                <div class="detail-row">
-                  <span class="detail-label">GST:</span>
-                  <span class="detail-value">${traveller.gst}</span>
-                </div>
-              ` : ''}
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">🚗</span>
+              Vehicle Details
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Type:</span>
+              <span class="detail-value">${bookingData.car?.type ? bookingData.car.type.toUpperCase() + ' AC taxi vehicle' : 'AC taxi vehicle'}</span>
             </div>
           </div>
           
-          ${traveller.gstDetails ? `
-            <div class="highlight">
-              <strong>📋 GST Details Required:</strong> Please provide your GST details for invoice generation.
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">👤</span>
+              Guest Information
             </div>
-          ` : ''}
+            <div class="detail-row">
+              <span class="detail-label">Name:</span>
+              <span class="detail-value">Mr/Mrs - ${traveller?.name || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Mobile:</span>
+              <span class="detail-value">+91 ${traveller?.mobile || 'N/A'}</span>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">📅</span>
+              Trip Schedule
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Date:</span>
+              <span class="detail-value">${date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Time:</span>
+              <span class="detail-value">${time || 'N/A'}</span>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">💳</span>
+              Payment Details
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Mode:</span>
+              <span class="detail-value">Cash/UPI - ${bookingData.paymentMethod === '0' ? 'Cash' : bookingData.paymentMethod === '20' ? 'UPI/Card (20% Advance)' : bookingData.paymentMethod === '100' ? 'UPI/Card (100% Advance)' : 'Cash'}</span>
+            </div>
+            <div class="payment-status">
+              Total Charges: ${bookingData.totalFare || car?.price || 0}/- INR ${bookingData.paymentMethod === '20' ? '(20% done)' : bookingData.paymentMethod === '100' ? '(100% done)' : ''}
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">📍</span>
+              Pickup Location
+            </div>
+            <div class="detail-value">${traveller?.pickup || traveller?.pickupAddress || 'N/A'}</div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">🎯</span>
+              Drop Location
+            </div>
+            <div class="detail-value">${traveller?.drop || traveller?.dropAddress || 'N/A'}</div>
+          </div>
         </div>
         
         <div class="email-footer">
-          <div class="company-name">MakeRide Team</div>
-          <div class="tagline">Your trusted travel partner</div>
+          <div class="footer-logo">PENTA CAB</div>
+          <div class="footer-tagline">Your trusted travel partner</div>
+          
           <div class="contact-info">
-            <p>📧 support@makeride.com | 📱 +91-XXXX-XXXXXX</p>
-            <p>🌐 www.makeride.com</p>
+            <div class="contact-item">📧 info@pentacab.com</div>
+            <div class="contact-item">📱 +91-7600839900</div>
+            <div class="contact-item">🌐 pentacabsfrontend-production.up.railway.app</div>
+          </div>
+          
+          <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+            <p>Thank you for choosing Penta Cab! Our team will contact you shortly with driver details.</p>
+            <p style="margin-top: 8px;">© 2024 Penta Cab. All rights reserved.</p>
           </div>
         </div>
       </div>
@@ -323,336 +328,362 @@ const generateEmailTemplate = (bookingData) => {
 
 // Template for booking confirmation emails
 const generateBookingConfirmationTemplate = (bookingData) => {
-  const { route, car, traveller, date, time, serviceType, bookingId, paymentMethod, totalFare, amountPaid } = bookingData;
-  
-  // Format date
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${months[date.getMonth()]} ${date.getDate()}`;
-  };
-
-  // Format time
-  const formatTime = (timeStr) => {
-    if (!timeStr) return '';
-    return timeStr;
-  };
-
-  // Get payment mode
-  const getPaymentMode = (method) => {
-    switch(method) {
-      case '0': return 'Cash';
-      case '20': return 'UPI/Card (20% Advance)';
-      case '100': return 'UPI/Card (100% Advance)';
-      default: return 'Cash';
-    }
-  };
-
-  // Get vehicle type
-  const getVehicleType = (carType) => {
-    switch(carType?.toLowerCase()) {
-      case 'sedan': return 'Sedan AC taxi vehicle';
-      case 'suv': return 'SUV AC taxi vehicle';
-      case 'innova': return 'Innova AC taxi vehicle';
-      case 'crysta': return 'Innova Crysta AC taxi vehicle';
-      default: return 'AC taxi vehicle';
-    }
-  };
-
-  // Calculate charges display
-  const getChargesDisplay = () => {
-    if (paymentMethod === '20') {
-      return `${totalFare}/- INR (20% done)`;
-    } else if (paymentMethod === '100') {
-      return `${totalFare}/- INR (100% done)`;
-    } else {
-      return `${totalFare}/- INR`;
-    }
-  };
-
-  return `
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-      <meta charset="UTF-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Booking Confirmation</title>
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          line-height: 1.6;
-          color: #333;
-          max-width: 600px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-        .header {
-          text-align: center;
-          margin-bottom: 30px;
-        }
-        .section {
-          margin-bottom: 20px;
-          padding: 15px;
-          border: 1px solid #ddd;
-          border-radius: 5px;
-        }
-        .label {
-          font-weight: bold;
-          margin-bottom: 5px;
-        }
-        .value {
-          margin-bottom: 10px;
-        }
-        .booking-id {
-          background-color: #f0f0f0;
-          padding: 10px;
-          border-radius: 5px;
-          font-family: monospace;
-          font-weight: bold;
-          text-align: center;
-          margin: 20px 0;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="header">
-        <h2>Your booking has been confirmed by Penta cab for</h2>
-      </div>
-
-      <div class="section">
-        <div class="label">Vehicle Type</div>
-        <div class="value">${getVehicleType(car?.type)}</div>
-      </div>
-
-      <div class="booking-id">
-        <div class="label">Booking id</div>
-        <div class="value">${bookingId || 'N/A'}</div>
-      </div>
-
-      <div class="section">
-        <div class="label">Guest</div>
-        <div class="value">
-          <div class="label">Name</div>
-          <div class="value">Mr/Mrs - ${traveller?.name || 'N/A'}</div>
-          
-          <div class="label">Mobile number</div>
-          <div class="value">‪+91  ${traveller?.mobile || 'N/A'}‬</div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="label">Date - ${formatDate(date)}</div>
-        <div class="label">Time - ${formatTime(time)}</div>
-      </div>
-
-      <div class="section">
-        <div class="label">Payment mode</div>
-        <div class="value">Cash/upi - ${getPaymentMode(paymentMethod)}</div>
-      </div>
-
-      <div class="section">
-        <div class="label">Pickup location</div>
-        <div class="value">${traveller?.pickup || traveller?.pickupAddress || 'N/A'}</div>
-      </div>
-
-      <div class="section">
-        <div class="label">Drop location</div>
-        <div class="value">${traveller?.drop || traveller?.dropAddress || 'N/A'}</div>
-      </div>
-
-      <div class="section">
-        <div class="label">Charges</div>
-        <div class="value">${getChargesDisplay()}</div>
-      </div>
-
-      <div style="text-align: center; margin-top: 30px; color: #666;">
-        <p>Thank you for choosing Penta Cab!</p>
-        <p>Our team will contact you shortly with driver details.</p>
-      </div>
-    </body>
-    </html>
-  `;
+  return generateEmailTemplate({
+    ...bookingData,
+    type: bookingData.serviceType || 'LOCAL'
+  });
 };
 
 // Template for driver details emails
 const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
   const { route, date, time, car, traveller, bookingId, paymentMethod, totalFare } = bookingData;
   
-  // Format date
-  const formatDate = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    return `${months[date.getMonth()]} ${date.getDate()}`;
-  };
-
-  // Format time
-  const formatTime = (timeStr) => {
-    if (!timeStr) return '';
-    return timeStr;
-  };
-
-  // Get payment mode
-  const getPaymentMode = (method) => {
-    switch(method) {
-      case '0': return 'Cash';
-      case '20': return 'UPI/Card (20% Advance)';
-      case '100': return 'UPI/Card (100% Advance)';
-      default: return 'Cash';
-    }
-  };
-
-  // Get vehicle type
-  const getVehicleType = (carType) => {
-    switch(carType?.toLowerCase()) {
-      case 'sedan': return 'Sedan AC taxi vehicle';
-      case 'suv': return 'SUV AC taxi vehicle';
-      case 'innova': return 'Innova AC taxi vehicle';
-      case 'crysta': return 'Innova Crysta AC taxi vehicle';
-      default: return 'AC taxi vehicle';
-    }
-  };
-
-  // Calculate charges display
-  const getChargesDisplay = () => {
-    if (paymentMethod === '20') {
-      return `${totalFare}/- INR (20% done)`;
-    } else if (paymentMethod === '100') {
-      return `${totalFare}/- INR (100% done)`;
-    } else {
-      return `${totalFare}/- INR`;
-    }
-  };
-
   return `
     <!DOCTYPE html>
     <html lang="en">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Driver Details</title>
+      <title>Driver Details - Penta Cab</title>
       <style>
         body {
           font-family: Arial, sans-serif;
           line-height: 1.6;
           color: #333;
-          max-width: 600px;
-          margin: 0 auto;
+          background-color: #f4f4f4;
+          margin: 0;
           padding: 20px;
         }
-        .header {
+        
+        .email-container {
+          max-width: 600px;
+          margin: 0 auto;
+          background: #ffffff;
+          border-radius: 10px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+        }
+        
+        .email-header {
+          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+          color: white;
+          padding: 30px 20px;
           text-align: center;
-          margin-bottom: 30px;
         }
-        .section {
-          margin-bottom: 20px;
-          padding: 15px;
-          border: 1px solid #ddd;
-          border-radius: 5px;
-        }
-        .label {
+        
+        .company-logo {
+          font-size: 28px;
           font-weight: bold;
-          margin-bottom: 5px;
-        }
-        .value {
           margin-bottom: 10px;
         }
-        .booking-id {
-          background-color: #f0f0f0;
-          padding: 10px;
-          border-radius: 5px;
-          font-family: monospace;
-          font-weight: bold;
+        
+        .header-title {
+          font-size: 22px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+        
+        .header-subtitle {
+          font-size: 14px;
+          opacity: 0.9;
+        }
+        
+        .email-body {
+          padding: 30px 20px;
+        }
+        
+        .booking-id-section {
+          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+          color: white;
+          padding: 20px;
+          border-radius: 8px;
           text-align: center;
-          margin: 20px 0;
+          margin-bottom: 25px;
         }
+        
+        .booking-id-label {
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+        
+        .booking-id-value {
+          font-size: 24px;
+          font-weight: bold;
+          font-family: monospace;
+          letter-spacing: 1px;
+        }
+        
+        .info-section {
+          margin-bottom: 20px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          padding: 20px;
+          border-left: 4px solid #28a745;
+        }
+        
+        .section-title {
+          font-size: 16px;
+          font-weight: 700;
+          color: #333;
+          margin-bottom: 15px;
+        }
+        
+        .section-icon {
+          font-size: 18px;
+          margin-right: 8px;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: #28a745;
+          color: white;
+          display: inline-block;
+          text-align: center;
+          line-height: 30px;
+        }
+        
+        .detail-row {
+          margin-bottom: 10px;
+          padding: 5px 0;
+        }
+        
+        .detail-label {
+          font-weight: 600;
+          color: #555;
+          font-size: 14px;
+          display: inline-block;
+          width: 120px;
+        }
+        
+        .detail-value {
+          color: #333;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        
+        .payment-status {
+          background: #28a745;
+          color: white;
+          padding: 12px 16px;
+          border-radius: 6px;
+          text-align: center;
+          font-weight: 600;
+          margin-top: 10px;
+        }
+        
         .driver-section {
-          background-color: #f9f9f9;
-          border: 2px solid #007bff;
+          background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+          color: white;
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 20px;
         }
+        
         .vehicle-section {
-          background-color: #e8f5e8;
-          border: 2px solid #28a745;
+          background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);
+          color: white;
+          border-radius: 8px;
+          padding: 20px;
+          margin-bottom: 20px;
+        }
+        
+        .whatsapp-button {
+          display: inline-block;
+          background: #25d366;
+          color: white;
+          padding: 10px 20px;
+          border-radius: 20px;
+          text-decoration: none;
+          font-weight: 600;
+          margin-top: 15px;
+        }
+        
+        .email-footer {
+          background: #2c3e50;
+          color: white;
+          padding: 25px 20px;
+          text-align: center;
+        }
+        
+        .footer-logo {
+          font-size: 20px;
+          font-weight: bold;
+          margin-bottom: 8px;
+        }
+        
+        .footer-tagline {
+          font-size: 14px;
+          margin-bottom: 15px;
+          opacity: 0.9;
+        }
+        
+        .contact-info {
+          margin-top: 15px;
+          font-size: 12px;
+          opacity: 0.8;
+        }
+        
+        .contact-item {
+          margin: 5px 0;
+        }
+        
+        @media (max-width: 600px) {
+          body {
+            padding: 10px;
+          }
+          
+          .email-container {
+            border-radius: 8px;
+          }
+          
+          .email-header {
+            padding: 25px 15px;
+          }
+          
+          .email-body {
+            padding: 25px 15px;
+          }
+          
+          .booking-id-value {
+            font-size: 20px;
+          }
         }
       </style>
     </head>
     <body>
-      <div class="header">
-        <h2>Your booking has been confirmed by Penta cab for</h2>
-      </div>
-
-      <div class="section">
-        <div class="label">Vehicle Type</div>
-        <div class="value">${getVehicleType(car?.type)}</div>
-      </div>
-
-      <div class="booking-id">
-        <div class="label">Booking id</div>
-        <div class="value">${bookingId || 'N/A'}</div>
-      </div>
-
-      <div class="section">
-        <div class="label">Guest</div>
-        <div class="value">
-          <div class="label">Name</div>
-          <div class="value">Mr/Mrs - ${traveller?.name || 'N/A'}</div>
-          
-          <div class="label">Mobile number</div>
-          <div class="value">‪+91  ${traveller?.mobile || 'N/A'}‬</div>
+      <div class="email-container">
+        <div class="email-header">
+          <div class="company-logo">🚗 PENTA CAB</div>
+          <div class="header-title">Driver Details Assigned!</div>
+          <div class="header-subtitle">Your chauffeur is ready</div>
         </div>
-      </div>
-
-      <div class="section">
-        <div class="label">Date - ${formatDate(date)}</div>
-        <div class="label">Time - ${formatTime(time)}</div>
-      </div>
-
-      <div class="section">
-        <div class="label">Payment mode</div>
-        <div class="value">Cash/upi - ${getPaymentMode(paymentMethod)}</div>
-      </div>
-
-      <div class="section">
-        <div class="label">Pickup location</div>
-        <div class="value">${traveller?.pickup || traveller?.pickupAddress || 'N/A'}</div>
-      </div>
-
-      <div class="section">
-        <div class="label">Drop location</div>
-        <div class="value">${traveller?.drop || traveller?.dropAddress || 'N/A'}</div>
-      </div>
-
-      <div class="section">
-        <div class="label">Charges</div>
-        <div class="value">${getChargesDisplay()}</div>
-      </div>
-
-      <div class="section driver-section">
-        <div class="label">Chauffeur details :</div>
-        <div class="value">
-          <div class="label">Chauffeur :</div>
-          <div class="value">${driverDetails?.name || 'N/A'}</div>
+        
+        <div class="email-body">
+          <div class="booking-id-section">
+            <div class="booking-id-label">Booking ID</div>
+            <div class="booking-id-value">${bookingId || 'N/A'}</div>
+          </div>
           
-          <div class="label">Mob. No :</div>
-          <div class="value">${driverDetails?.whatsappNumber || 'N/A'}</div>
-        </div>
-      </div>
-
-      <div class="section vehicle-section">
-        <div class="label">Vehicle details :</div>
-        <div class="value">
-          <div class="label">Cab :</div>
-          <div class="value">${car?.name || car?.type || 'N/A'}</div>
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">🚗</span>
+              Vehicle Details
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Type:</span>
+              <span class="detail-value">${car?.type ? car.type.toUpperCase() + ' AC taxi vehicle' : 'AC taxi vehicle'}</span>
+            </div>
+          </div>
           
-          <div class="label">Reg. no/car number . :</div>
-          <div class="value">${driverDetails?.vehicleNumber || 'N/A'}</div>
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">👤</span>
+              Guest Information
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Name:</span>
+              <span class="detail-value">Mr/Mrs - ${traveller?.name || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Mobile:</span>
+              <span class="detail-value">+91 ${traveller?.mobile || 'N/A'}</span>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">📅</span>
+              Trip Schedule
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Date:</span>
+              <span class="detail-value">${date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Time:</span>
+              <span class="detail-value">${time || 'N/A'}</span>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">💳</span>
+              Payment Details
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Mode:</span>
+              <span class="detail-value">Cash/UPI - ${paymentMethod === '0' ? 'Cash' : paymentMethod === '20' ? 'UPI/Card (20% Advance)' : paymentMethod === '100' ? 'UPI/Card (100% Advance)' : 'Cash'}</span>
+            </div>
+            <div class="payment-status">
+              Total Charges: ${totalFare || car?.price || 0}/- INR ${paymentMethod === '20' ? '(20% done)' : paymentMethod === '100' ? '(100% done)' : ''}
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">📍</span>
+              Pickup Location
+            </div>
+            <div class="detail-value">${traveller?.pickup || traveller?.pickupAddress || 'N/A'}</div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">🎯</span>
+              Drop Location
+            </div>
+            <div class="detail-value">${traveller?.drop || traveller?.dropAddress || 'N/A'}</div>
+          </div>
+          
+          <div class="driver-section">
+            <div class="section-title">
+              <span class="section-icon">👨‍💼</span>
+              Chauffeur Details
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Chauffeur:</span>
+              <span class="detail-value">${driverDetails?.name || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Mob. No:</span>
+              <span class="detail-value">${driverDetails?.whatsappNumber || 'N/A'}</span>
+            </div>
+            <a href="https://wa.me/${driverDetails?.whatsappNumber?.replace(/[^0-9]/g, '') || ''}" class="whatsapp-button">
+              💬 Contact Driver on WhatsApp
+            </a>
+          </div>
+          
+          <div class="vehicle-section">
+            <div class="section-title">
+              <span class="section-icon">🚙</span>
+              Vehicle Details
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Cab:</span>
+              <span class="detail-value">${car?.name || car?.type || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Reg. no/car number:</span>
+              <span class="detail-value">${driverDetails?.vehicleNumber || 'N/A'}</span>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div style="text-align: center; margin-top: 30px; color: #666;">
-        <p>Thank you for choosing Penta Cab!</p>
-        <p>Safe travels! 🚗✨</p>
+        
+        <div class="email-footer">
+          <div class="footer-logo">PENTA CAB</div>
+          <div class="footer-tagline">Your trusted travel partner</div>
+          
+          <div class="contact-info">
+            <div class="contact-item">📧 info@pentacab.com</div>
+            <div class="contact-item">📱 +91-7600839900</div>
+            <div class="contact-item">🌐 pentacabsfrontend-production.up.railway.app</div>
+          </div>
+          
+          <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+            <p>Safe travels! 🚗✨</p>
+            <p style="margin-top: 8px;">© 2024 Penta Cab. All rights reserved.</p>
+          </div>
+        </div>
       </div>
     </body>
     </html>
@@ -669,78 +700,76 @@ const generateDeclineTemplate = (route, reason) => {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Booking Update</title>
       <style>
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-        }
-        
         body {
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+          font-family: Arial, sans-serif;
           line-height: 1.6;
           color: #333;
-          background-color: #f8f9fa;
+          background-color: #f4f4f4;
+          margin: 0;
+          padding: 20px;
         }
         
         .email-container {
           max-width: 600px;
           margin: 0 auto;
-          background-color: #ffffff;
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+          background: #ffffff;
+          border-radius: 10px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
           overflow: hidden;
         }
         
         .email-header {
           background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
           color: white;
-          padding: 24px;
+          padding: 30px 20px;
           text-align: center;
         }
         
-        .email-header h1 {
-          font-size: 24px;
+        .company-logo {
+          font-size: 28px;
+          font-weight: bold;
+          margin-bottom: 10px;
+        }
+        
+        .header-title {
+          font-size: 22px;
           font-weight: 600;
           margin-bottom: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
         }
         
         .email-body {
-          padding: 32px 24px;
+          padding: 30px 20px;
         }
         
         .decline-info {
-          background-color: #fff5f5;
+          background: #fff5f5;
           border-radius: 8px;
           padding: 20px;
-          margin-bottom: 24px;
+          margin-bottom: 25px;
           border-left: 4px solid #dc3545;
         }
         
-        .info-row {
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          padding: 8px 0;
-          font-size: 14px;
+        .detail-row {
+          margin-bottom: 10px;
+          padding: 5px 0;
         }
         
-        .info-label {
+        .detail-label {
           font-weight: 600;
-          color: #34495e;
-          min-width: 80px;
+          color: #555;
+          font-size: 14px;
+          display: inline-block;
+          width: 120px;
         }
         
-        .info-value {
-          color: #2c3e50;
-          flex: 1;
+        .detail-value {
+          color: #333;
+          font-size: 14px;
+          font-weight: 500;
         }
         
         .apology-note {
-          background-color: #f8f9fa;
+          background: #f8f9fa;
           border-radius: 8px;
           padding: 20px;
           text-align: center;
@@ -749,27 +778,34 @@ const generateDeclineTemplate = (route, reason) => {
         }
         
         .email-footer {
-          background-color: #f8f9fa;
-          padding: 24px;
+          background: #2c3e50;
+          color: white;
+          padding: 25px 20px;
           text-align: center;
-          border-top: 1px solid #e9ecef;
         }
         
-        .company-name {
-          font-weight: 600;
-          color: #dc3545;
-          font-size: 16px;
-          margin-bottom: 4px;
+        .footer-logo {
+          font-size: 20px;
+          font-weight: bold;
+          margin-bottom: 8px;
+        }
+        
+        .contact-info {
+          margin-top: 15px;
+          font-size: 12px;
+          opacity: 0.8;
+        }
+        
+        .contact-item {
+          margin: 5px 0;
         }
       </style>
     </head>
     <body>
       <div class="email-container">
         <div class="email-header">
-          <h1>
-            <span>📝</span>
-            <span>Booking Update</span>
-          </h1>
+          <div class="company-logo">🚗 PENTA CAB</div>
+          <div class="header-title">Booking Update</div>
         </div>
         
         <div class="email-body">
@@ -778,14 +814,14 @@ const generateDeclineTemplate = (route, reason) => {
               We regret to inform you that we are unable to fulfill your booking request at this time.
             </p>
             
-            <div class="info-row">
-              <span class="info-label">Route:</span>
-              <span class="info-value">${route}</span>
+            <div class="detail-row">
+              <span class="detail-label">Route:</span>
+              <span class="detail-value">${route}</span>
             </div>
             
-            <div class="info-row">
-              <span class="info-label">Reason:</span>
-              <span class="info-value">${reason || 'Service temporarily unavailable'}</span>
+            <div class="detail-row">
+              <span class="detail-label">Reason:</span>
+              <span class="detail-value">${reason || 'Service temporarily unavailable'}</span>
             </div>
           </div>
           
@@ -796,10 +832,11 @@ const generateDeclineTemplate = (route, reason) => {
         </div>
         
         <div class="email-footer">
-          <div class="company-name">MakeRide Team</div>
-          <p style="color: #6c757d; font-size: 14px; margin-top: 8px;">
-            📧 support@makeride.com | 📱 +91-XXXX-XXXXXX
-          </p>
+          <div class="footer-logo">PENTA CAB</div>
+          <div class="contact-info">
+            <div class="contact-item">📧 info@pentacab.com</div>
+            <div class="contact-item">📱 +91-7600839900</div>
+          </div>
         </div>
       </div>
     </body>
