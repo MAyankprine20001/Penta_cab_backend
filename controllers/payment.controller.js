@@ -150,12 +150,46 @@ exports.verifyPayment = async (req, res) => {
 
       // Create booking request with payment details
       if (bookingData) {
+        // Validate required fields
+        if (!bookingData.name || !bookingData.email || !bookingData.mobile) {
+          console.error("Missing required fields:", {
+            name: bookingData.name,
+            email: bookingData.email,
+            mobile: bookingData.mobile
+          });
+          return res.status(400).json({
+            success: false,
+            message: "Missing required booking fields: name, email, or mobile"
+          });
+        }
+
         // Generate unique booking ID
         const customBookingId = await generateBookingId();
         
+        // Map booking data to match the schema structure
         const bookingRequestData = {
-          ...bookingData,
           bookingId: customBookingId,
+          serviceType: bookingData.serviceType,
+          traveller: {
+            name: bookingData.name,
+            email: bookingData.email,
+            mobile: bookingData.mobile || bookingData.phoneNumber,
+            pickup: bookingData.pickup,
+            drop: bookingData.drop,
+            pickupAddress: bookingData.pickup,
+            dropAddress: bookingData.drop,
+            whatsapp: bookingData.whatsapp === 'true' || bookingData.whatsapp === true,
+            gstDetails: bookingData.gstDetails === 'true' || bookingData.gstDetails === true
+          },
+          route: `${bookingData.from} to ${bookingData.to}`,
+          cab: {
+            type: bookingData.selectedCabType,
+            price: parseInt(bookingData.selectedCabPrice),
+            _id: bookingData.selectedCabId
+          },
+          date: bookingData.date,
+          time: bookingData.time || bookingData.pickupTime,
+          estimatedDistance: bookingData.estimatedDistance,
           paymentMethod: selectedPayment,
           paymentDetails: {
             totalFare: totalFare,
@@ -197,9 +231,11 @@ exports.verifyPayment = async (req, res) => {
           });
         } catch (bookingError) {
           console.error("Error creating booking:", bookingError);
+          console.error("Booking data that failed:", JSON.stringify(bookingRequestData, null, 2));
           return res.status(500).json({
             success: false,
-            message: "Payment verified but booking creation failed"
+            message: "Payment verified but booking creation failed",
+            error: bookingError.message
           });
         }
       }
