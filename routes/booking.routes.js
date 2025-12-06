@@ -195,7 +195,7 @@ router.put('/api/booking-requests/:id/driver-details', async (req, res) => {
 
     await sendEmail({
       to: bookingRequest.traveller.email,
-      subject: "🚖 Your Driver Details - MakeRide",
+      subject: "🚖 Your Driver Details - Penta Cabs",
       html
     });
 
@@ -212,7 +212,7 @@ router.post('/api/send-decline-email', async (req, res) => {
     
     await sendEmail({ 
       to: email, 
-      subject: "📝 Booking Update - MakeRide", 
+      subject: "📝 Booking Update - Penta Cabs", 
       html 
     });
     return res.json({ message: 'Decline email sent successfully' });

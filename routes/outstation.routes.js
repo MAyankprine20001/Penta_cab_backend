@@ -100,7 +100,7 @@ router.post('/send-route-email', async (req, res) => {
         <p>Hello,</p>
         <p>We’re excited to announce a new outstation route: <strong>${route}</strong>.</p>
         <ul>${availableCars || '<li>No cars currently available</li>'}</ul>
-        <p>✅ Book now!</p><br/><p><strong>MakeRide Team</strong></p>`
+        <p>✅ Book now!</p><br/><p><strong>Penta Cabs Team</strong></p>`
     });
 
     return res.json({ message: 'Email sent successfully' });
@@ -130,7 +130,7 @@ router.post('/send-intercity-email', async (req, res) => {
     });
     
     await sendEmail({ 
-      from: `"MakeRide Admin" <${process.env.EMAIL_USER}>`, 
+      from: `"Penta Cabs Admin" <${process.env.EMAIL_USER}>`, 
       to: email, 
       subject: "🚗 Intercity Booking Confirmation", 
       html 
