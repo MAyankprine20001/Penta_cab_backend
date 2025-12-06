@@ -229,7 +229,7 @@ router.post('/send-airport-inquiry', async (req, res) => {
     
     // Send inquiry email to admin
     await sendEmail({
-      to: 'mayankpandeyji2001@gmail.com',
+      to: 'booking.pentacab@gmail.com',
       subject: `🛫 New Airport Inquiry: ${airportCity} ${serviceType === 'pickup' ? 'Pickup' : 'Drop'} - ${name}`,
       html: inquiryHtml
     });
