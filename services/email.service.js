@@ -5,7 +5,7 @@ async function sendEmail({ to, subject, text, html }) {
   try {
     const result = await sgMail.send({
       to,
-      from: "ahelix90@gmail.com", // must be verified in SendGrid
+      from: "booking.pentacab@gmail.com",
       subject,
       text,
       html,
