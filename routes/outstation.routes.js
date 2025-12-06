@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const sendEmail = require('../services/email.service');
 const { OutstationEntry } = require('../model');
-const { generateBookingConfirmationTemplate } = require('../utils/emailTemplates');
+const { generateBookingConfirmationTemplate, generateAdminBookingNotificationTemplate } = require('../utils/emailTemplates');
 
 // CRUD listing with pagination
 router.get('/api/outstation-routes', async (req, res) => {
@@ -137,11 +137,27 @@ router.post('/send-intercity-email', async (req, res) => {
       html 
     });
     
+    // Generate admin-specific email template
+    const adminHtml = generateAdminBookingNotificationTemplate({
+      serviceType: 'OUTSTATION',
+      route,
+      car: cab,
+      traveller: {
+        ...traveller,
+        email: email
+      },
+      date,
+      time,
+      bookingId,
+      paymentMethod,
+      totalFare
+    });
+    
     // Send email to admin
     await sendEmail({
       to: 'booking.pentacab@gmail.com',
       subject: `🚗 New Intercity Booking: ${route} - ${traveller?.name || 'Customer'}`,
-      html
+      html: adminHtml
     });
     
     return res.json({ message: "Intercity booking email sent successfully" });

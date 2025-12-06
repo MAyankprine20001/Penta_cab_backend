@@ -2,7 +2,7 @@ const router = require('express').Router();
 // const transporter = require('../services/email.service');
 const sendEmail = require('../services/email.service');
 const { LocalRideEntry } = require('../model');
-const { generateBookingConfirmationTemplate } = require('../utils/emailTemplates');
+const { generateBookingConfirmationTemplate, generateAdminBookingNotificationTemplate } = require('../utils/emailTemplates');
 
 // GET /api/local-services (pagination + search)
 router.get('/api/local-services', async (req, res) => {
@@ -120,11 +120,27 @@ router.post('/send-local-email', async (req, res) => {
       html 
     });
     
+    // Generate admin-specific email template
+    const adminHtml = generateAdminBookingNotificationTemplate({
+      serviceType: 'LOCAL',
+      route,
+      car,
+      traveller: {
+        ...traveller,
+        email: email
+      },
+      date,
+      time,
+      bookingId,
+      paymentMethod,
+      totalFare
+    });
+    
     // Send email to admin
     await sendEmail({
       to: 'booking.pentacab@gmail.com',
       subject: `🚖 New Local Booking: ${route} - ${traveller?.name || 'Customer'}`,
-      html
+      html: adminHtml
     });
     
     return res.json({ message: 'Local ride email sent successfully' });

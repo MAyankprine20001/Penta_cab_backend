@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const sendEmail = require('../services/email.service');
 const { AirportEntry } = require('../model');
-const { generateBookingConfirmationTemplate } = require('../utils/emailTemplates');
+const { generateBookingConfirmationTemplate, generateAdminBookingNotificationTemplate } = require('../utils/emailTemplates');
 
 // GET /api/airport-services (pagination + search)
 router.get('/api/airport-services', async (req, res) => {
@@ -147,11 +147,27 @@ router.post('/api/send-airport-email', async (req, res) => {
       html
     });
     
+    // Generate admin-specific email template
+    const adminHtml = generateAdminBookingNotificationTemplate({
+      serviceType: 'AIRPORT',
+      route,
+      car: cab,
+      traveller: {
+        ...traveller,
+        email: email
+      },
+      date,
+      time,
+      bookingId,
+      paymentMethod,
+      totalFare
+    });
+    
     // Send email to admin
     await sendEmail({
       to: 'booking.pentacab@gmail.com',
       subject: `🛫 New Airport Booking: ${route} - ${traveller?.name || 'Customer'}`,
-      html
+      html: adminHtml
     });
     
     res.json({ message: 'Airport booking email sent successfully' });

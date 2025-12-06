@@ -334,6 +334,346 @@ const generateBookingConfirmationTemplate = (bookingData) => {
   });
 };
 
+// Template for admin booking notification emails (slightly different from user email)
+const generateAdminBookingNotificationTemplate = (bookingData) => {
+  const { type, route, car, traveller, date, time, serviceType, bookingId, paymentMethod, totalFare } = bookingData;
+  
+  // Determine the appropriate icon and title based on booking type
+  let icon, title;
+  switch (type || serviceType) {
+    case 'LOCAL':
+      icon = '🚖';
+      title = 'Local Ride Booking';
+      break;
+    case 'AIRPORT':
+      icon = '🛫';
+      title = serviceType === 'drop' ? 'Airport Drop Booking' : 'Airport Pickup Booking';
+      break;
+    case 'OUTSTATION':
+      icon = '🚗';
+      title = 'Intercity Booking';
+      break;
+    default:
+      icon = '🚖';
+      title = 'New Booking';
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>${title} - Admin Notification</title>
+      <style>
+        * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+        }
+        
+        body {
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #333;
+          background-color: #f4f4f4;
+          margin: 0;
+          padding: 20px;
+        }
+        
+        .email-container {
+          max-width: 600px;
+          margin: 0 auto;
+          background: #ffffff;
+          border-radius: 10px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+          overflow: hidden;
+        }
+        
+        .email-header {
+          background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+          color: white;
+          padding: 30px 20px;
+          text-align: center;
+        }
+        
+        .company-logo {
+          font-size: 28px;
+          font-weight: bold;
+          margin-bottom: 10px;
+        }
+        
+        .header-title {
+          font-size: 22px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+        
+        .header-subtitle {
+          font-size: 14px;
+          opacity: 0.9;
+        }
+        
+        .admin-badge {
+          background: rgba(255, 255, 255, 0.2);
+          padding: 5px 15px;
+          border-radius: 20px;
+          font-size: 12px;
+          margin-top: 10px;
+          display: inline-block;
+        }
+        
+        .email-body {
+          padding: 30px 20px;
+        }
+        
+        .booking-id-section {
+          background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+          color: white;
+          padding: 20px;
+          border-radius: 8px;
+          text-align: center;
+          margin-bottom: 25px;
+        }
+        
+        .booking-id-label {
+          font-size: 14px;
+          font-weight: 600;
+          margin-bottom: 8px;
+        }
+        
+        .booking-id-value {
+          font-size: 24px;
+          font-weight: bold;
+          font-family: monospace;
+          letter-spacing: 1px;
+        }
+        
+        .info-section {
+          margin-bottom: 20px;
+          background: #f8f9fa;
+          border-radius: 8px;
+          padding: 20px;
+          border-left: 4px solid #ff6b6b;
+        }
+        
+        .section-title {
+          font-size: 16px;
+          font-weight: 700;
+          color: #333;
+          margin-bottom: 15px;
+        }
+        
+        .section-icon {
+          font-size: 18px;
+          margin-right: 8px;
+          width: 30px;
+          height: 30px;
+          border-radius: 50%;
+          background: #ff6b6b;
+          color: white;
+          display: inline-block;
+          text-align: center;
+          line-height: 30px;
+        }
+        
+        .detail-row {
+          margin-bottom: 10px;
+          padding: 5px 0;
+        }
+        
+        .detail-label {
+          font-weight: 600;
+          color: #555;
+          font-size: 14px;
+          display: inline-block;
+          width: 120px;
+        }
+        
+        .detail-value {
+          color: #333;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        
+        .payment-status {
+          background: #ff6b6b;
+          color: white;
+          padding: 12px 16px;
+          border-radius: 6px;
+          text-align: center;
+          font-weight: 600;
+          margin-top: 10px;
+        }
+        
+        .email-footer {
+          background: #2c3e50;
+          color: white;
+          padding: 25px 20px;
+          text-align: center;
+        }
+        
+        .footer-logo {
+          font-size: 20px;
+          font-weight: bold;
+          margin-bottom: 8px;
+        }
+        
+        .footer-tagline {
+          font-size: 14px;
+          margin-bottom: 15px;
+          opacity: 0.9;
+        }
+        
+        .contact-info {
+          margin-top: 15px;
+          font-size: 12px;
+          opacity: 0.8;
+        }
+        
+        .contact-item {
+          margin: 5px 0;
+        }
+        
+        @media (max-width: 600px) {
+          body {
+            padding: 10px;
+          }
+          
+          .email-container {
+            border-radius: 8px;
+          }
+          
+          .email-header {
+            padding: 25px 15px;
+          }
+          
+          .email-body {
+            padding: 25px 15px;
+          }
+          
+          .booking-id-value {
+            font-size: 20px;
+          }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="email-container">
+        <div class="email-header">
+          <div class="company-logo">${icon} PENTA CAB</div>
+          <div class="header-title">New Booking Notification</div>
+          <div class="header-subtitle">Action Required - Please Review</div>
+          <div class="admin-badge">ADMIN PANEL</div>
+        </div>
+        
+        <div class="email-body">
+          <div class="booking-id-section">
+            <div class="booking-id-label">Booking ID</div>
+            <div class="booking-id-value">${bookingId || 'N/A'}</div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">🚗</span>
+              Vehicle Details
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Type:</span>
+              <span class="detail-value">${car?.type ? car.type.toUpperCase() + ' AC taxi vehicle' : 'AC taxi vehicle'}</span>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">👤</span>
+              Customer Information
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Name:</span>
+              <span class="detail-value">${traveller?.name || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Mobile:</span>
+              <span class="detail-value">+91 ${traveller?.mobile || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Email:</span>
+              <span class="detail-value">${traveller?.email || 'N/A'}</span>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">📅</span>
+              Trip Schedule
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Route:</span>
+              <span class="detail-value">${route || 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Date:</span>
+              <span class="detail-value">${date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Time:</span>
+              <span class="detail-value">${time || 'N/A'}</span>
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">💳</span>
+              Payment Details
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Mode:</span>
+              <span class="detail-value">${paymentMethod === '0' ? 'Cash Payment' : paymentMethod === '20' ? 'UPI/Card (20% Advance)' : paymentMethod === '100' ? 'UPI/Card (100% Advance)' : 'Cash'}</span>
+            </div>
+            <div class="payment-status">
+              Total Charges: ₹${totalFare || car?.price || 0} ${paymentMethod === '20' ? '(20% Advance Paid)' : paymentMethod === '100' ? '(100% Advance Paid)' : '(Cash on Delivery)'}
+            </div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">📍</span>
+              Pickup Location
+            </div>
+            <div class="detail-value">${traveller?.pickup || traveller?.pickupAddress || 'N/A'}</div>
+          </div>
+          
+          <div class="info-section">
+            <div class="section-title">
+              <span class="section-icon">🎯</span>
+              Drop Location
+            </div>
+            <div class="detail-value">${traveller?.drop || traveller?.dropAddress || 'N/A'}</div>
+          </div>
+        </div>
+        
+        <div class="email-footer">
+          <div class="footer-logo">PENTA CAB</div>
+          <div class="footer-tagline">Admin Notification System</div>
+          
+          <div class="contact-info">
+            <div class="contact-item">📧 info@pentacab.com</div>
+            <div class="contact-item">📱 +91-7600839900</div>
+            <div class="contact-item">🌐 pentacabsfrontend-production.up.railway.app</div>
+          </div>
+          
+          <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+            <p>Please assign a driver and vehicle for this booking.</p>
+            <p style="margin-top: 8px;">© 2024 Penta Cab. All rights reserved.</p>
+          </div>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
 // Template for driver details emails
 const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
   const { route, date, time, car, traveller, bookingId, paymentMethod, totalFare } = bookingData;
@@ -847,6 +1187,7 @@ const generateDeclineTemplate = (route, reason) => {
 module.exports = {
   generateEmailTemplate,
   generateBookingConfirmationTemplate,
+  generateAdminBookingNotificationTemplate,
   generateDriverDetailsTemplate,
   generateDeclineTemplate
 };
