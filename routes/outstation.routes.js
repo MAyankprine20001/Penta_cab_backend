@@ -129,12 +129,21 @@ router.post('/send-intercity-email', async (req, res) => {
       totalFare
     });
     
+    // Send email to user
     await sendEmail({ 
       from: `"Penta Cabs Admin" <${process.env.EMAIL_USER}>`, 
       to: email, 
       subject: "🚗 Intercity Booking Confirmation", 
       html 
     });
+    
+    // Send email to admin
+    await sendEmail({
+      to: 'booking.pentacab@gmail.com',
+      subject: `🚗 New Intercity Booking: ${route} - ${traveller?.name || 'Customer'}`,
+      html
+    });
+    
     return res.json({ message: "Intercity booking email sent successfully" });
   } catch (err) { 
     console.error('Email sending error:', err);

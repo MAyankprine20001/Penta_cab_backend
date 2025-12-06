@@ -113,11 +113,20 @@ router.post('/send-local-email', async (req, res) => {
     });
 
     console.log("code comes here-->>");
+    // Send email to user
     await sendEmail({ 
       to: email, 
       subject: '🚖 Local Ride Booking Confirmation', 
       html 
     });
+    
+    // Send email to admin
+    await sendEmail({
+      to: 'booking.pentacab@gmail.com',
+      subject: `🚖 New Local Booking: ${route} - ${traveller?.name || 'Customer'}`,
+      html
+    });
+    
     return res.json({ message: 'Local ride email sent successfully' });
   } catch (err) { 
     console.error('Email sending error:', err);

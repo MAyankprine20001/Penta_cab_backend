@@ -140,11 +140,20 @@ router.post('/api/send-airport-email', async (req, res) => {
   });
 
   try {
+    // Send email to user
     await sendEmail({
       to: email,
       subject: `🛫 Airport ${serviceType === 'drop' ? 'Drop' : 'Pickup'} Booking Confirmation`,
       html
     });
+    
+    // Send email to admin
+    await sendEmail({
+      to: 'booking.pentacab@gmail.com',
+      subject: `🛫 New Airport Booking: ${route} - ${traveller?.name || 'Customer'}`,
+      html
+    });
+    
     res.json({ message: 'Airport booking email sent successfully' });
   } catch (err) { 
     console.error('Email sending error:', err);
