@@ -27,7 +27,7 @@ const generateBookingId = async () => {
 };
 
 // Cab type to name mapping
-const getCabName = (cabTypeOrId) => {
+const getCabName = (cabType, cabId) => {
   // Handle both cab type strings and ID strings
   const cabTypeMapping = {
     'sedan': 'SEDAN',
@@ -43,8 +43,15 @@ const getCabName = (cabTypeOrId) => {
     '4': 'INNOVA CRYSTAL'
   };
   
-  // First try ID mapping, then type mapping
-  return cabIdMapping[cabTypeOrId] || cabTypeMapping[cabTypeOrId] || cabTypeOrId;
+  // Prioritize type over ID - use type if available, otherwise fall back to ID
+  if (cabType && cabTypeMapping[cabType]) {
+    return cabTypeMapping[cabType];
+  }
+  if (cabId && cabIdMapping[cabId]) {
+    return cabIdMapping[cabId];
+  }
+  // Fallback to type or ID as-is if not in mappings
+  return cabType || cabId || 'Unknown';
 };
 
 // POST /api/create-booking-request
@@ -151,7 +158,10 @@ router.get('/api/booking-requests', async (req, res) => {
         },
         cab: {
           ...(typeof request.cab === 'string' ? { _id: request.cab } : request.cab),
-          name: getCabName(typeof request.cab === 'string' ? request.cab : request.cab?.type)
+          name: getCabName(
+            typeof request.cab === 'string' ? null : request.cab?.type,
+            typeof request.cab === 'string' ? request.cab : request.cab?._id
+          )
         }
       };
     });
