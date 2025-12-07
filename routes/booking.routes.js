@@ -23,11 +23,13 @@ const generateBookingId = async () => {
   
   const sequenceNumber = String(todayBookingsCount + 1).padStart(2, '0');
   
-  return `Pc${year}${month}${day}${sequenceNumber}`;
+  return `PC${year}${month}${day}${sequenceNumber}`;
 };
 
+
+
 // Cab type to name mapping
-const getCabName = (cabType, cabId) => {
+const getCabName = (cabTypeOrId) => {
   // Handle both cab type strings and ID strings
   const cabTypeMapping = {
     'sedan': 'SEDAN',
@@ -37,21 +39,14 @@ const getCabName = (cabType, cabId) => {
   };
   
   const cabIdMapping = {
-    '1': 'Innova',
-    '2': 'SEDAN',
-    '3': 'SUV',
+    '1': 'SEDAN',
+    '2': 'SUV',
+    '3': 'Innova',
     '4': 'INNOVA CRYSTAL'
   };
   
-  // Prioritize type over ID - use type if available, otherwise fall back to ID
-  if (cabType && cabTypeMapping[cabType]) {
-    return cabTypeMapping[cabType];
-  }
-  if (cabId && cabIdMapping[cabId]) {
-    return cabIdMapping[cabId];
-  }
-  // Fallback to type or ID as-is if not in mappings
-  return cabType || cabId || 'Unknown';
+  // First try ID mapping, then type mapping
+  return  cabIdMapping[cabTypeOrId] ;
 };
 
 // POST /api/create-booking-request
@@ -149,6 +144,8 @@ router.get('/api/booking-requests', async (req, res) => {
         paymentStatus = 'Cash on Delivery';
       }
 
+     
+
       return {
         ...request.toObject(),
         calculatedPayment: {
@@ -158,10 +155,7 @@ router.get('/api/booking-requests', async (req, res) => {
         },
         cab: {
           ...(typeof request.cab === 'string' ? { _id: request.cab } : request.cab),
-          name: getCabName(
-            typeof request.cab === 'string' ? null : request.cab?.type,
-            typeof request.cab === 'string' ? request.cab : request.cab?._id
-          )
+          name: getCabName(typeof request.cab === 'string' ? request.cab : request.cab?.type)
         }
       };
     });
