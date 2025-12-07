@@ -310,7 +310,7 @@ const generateEmailTemplate = (bookingData) => {
           <div class="footer-tagline">Your trusted travel partner</div>
           
           <div class="contact-info">
-            <div class="contact-item">📧 info@pentacab.com</div>
+            <div class="contact-item">📧 info.pentacab@gmail.com</div>
             <div class="contact-item">📱 +91-7600839900</div>
             <div class="contact-item">🌐 pentacabsfrontend-production.up.railway.app</div>
           </div>
@@ -658,7 +658,7 @@ const generateAdminBookingNotificationTemplate = (bookingData) => {
           <div class="footer-tagline">Admin Notification System</div>
           
           <div class="contact-info">
-            <div class="contact-item">📧 info@pentacab.com</div>
+            <div class="contact-item">📧 info.pentacab@gmail.com</div>
             <div class="contact-item">📱 +91-7600839900</div>
             <div class="contact-item">🌐 pentacabsfrontend-production.up.railway.app</div>
           </div>
@@ -1014,7 +1014,7 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
           <div class="footer-tagline">Your trusted travel partner</div>
           
           <div class="contact-info">
-            <div class="contact-item">📧 info@pentacab.com</div>
+            <div class="contact-item">📧 info.pentacab@gmail.com</div>
             <div class="contact-item">📱 +91-7600839900</div>
             <div class="contact-item">🌐 pentacabsfrontend-production.up.railway.app</div>
           </div>
@@ -1174,7 +1174,7 @@ const generateDeclineTemplate = (route, reason) => {
         <div class="email-footer">
           <div class="footer-logo">PENTA CAB</div>
           <div class="contact-info">
-            <div class="contact-item">📧 info@pentacab.com</div>
+            <div class="contact-item">📧 info.pentacab@gmail.com</div>
             <div class="contact-item">📱 +91-7600839900</div>
           </div>
         </div>
