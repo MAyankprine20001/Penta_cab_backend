@@ -25,7 +25,7 @@ const generateBookingId = async () => {
   
   const sequenceNumber = String(todayBookingsCount + 1).padStart(2, '0');
   
-  return `Pc${year}${month}${day}${sequenceNumber}`;
+  return `PC${year}${month}${day}${sequenceNumber}`;
 };
 
 // controller
