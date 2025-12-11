@@ -91,10 +91,14 @@ router.get('/api/available-cities', async (req, res) => {
 // POST /send-local-email
 router.post('/send-local-email', async (req, res) => {
   try {
-    const { email, route, car, traveller, date, time, bookingId, paymentMethod, totalFare } = req.body;
+    const { email, route, car, traveller, date, time, pickupTime, bookingId, paymentMethod, totalFare } = req.body;
     if (!email || !route || !car || !traveller) {
       return res.status(400).json({ error: 'Missing data for email' });
     }
+
+    // Use time or pickupTime as fallback
+    const finalTime = time || pickupTime || '';
+    const finalDate = date || '';
 
     // Generate the modern email template
     const html = generateBookingConfirmationTemplate({
@@ -105,8 +109,8 @@ router.post('/send-local-email', async (req, res) => {
         ...traveller,
         email: email
       },
-      date,
-      time,
+      date: finalDate,
+      time: finalTime,
       bookingId,
       paymentMethod,
       totalFare
@@ -129,8 +133,8 @@ router.post('/send-local-email', async (req, res) => {
         ...traveller,
         email: email
       },
-      date,
-      time,
+      date: finalDate,
+      time: finalTime,
       bookingId,
       paymentMethod,
       totalFare

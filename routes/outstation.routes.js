@@ -109,8 +109,12 @@ router.post('/send-route-email', async (req, res) => {
 
 // POST /send-intercity-email
 router.post('/send-intercity-email', async (req, res) => {
-  const { email, route, cab, traveller, date, time, bookingId, paymentMethod, totalFare } = req.body;
+  const { email, route, cab, traveller, date, time, pickupTime, bookingId, paymentMethod, totalFare } = req.body;
   if (!email || !route || !cab) return res.status(400).json({ error: 'Missing required data' });
+  
+  // Use time or pickupTime as fallback
+  const finalTime = time || pickupTime || '';
+  const finalDate = date || '';
   
   try {
     // Generate the modern email template
@@ -122,8 +126,8 @@ router.post('/send-intercity-email', async (req, res) => {
         ...traveller,
         email: email
       },
-      date,
-      time,
+      date: finalDate,
+      time: finalTime,
       bookingId,
       paymentMethod,
       totalFare
@@ -146,8 +150,8 @@ router.post('/send-intercity-email', async (req, res) => {
         ...traveller,
         email: email
       },
-      date,
-      time,
+      date: finalDate,
+      time: finalTime,
       bookingId,
       paymentMethod,
       totalFare

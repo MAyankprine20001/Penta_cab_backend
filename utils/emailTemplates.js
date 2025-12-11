@@ -1,6 +1,84 @@
 // Email Template Utility for Penta Cab
 // Fixed version with better email client compatibility
 
+// Helper function to format date safely
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  
+  try {
+    const dateStr = String(dateString).trim();
+    
+    // Try parsing different date formats
+    let date = null;
+    
+    // Handle YYYY-MM-DD format (most common from HTML date inputs)
+    if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      const parts = dateStr.split('-');
+      date = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    }
+    // Handle DD-MM-YYYY format
+    else if (dateStr.match(/^\d{2}-\d{2}-\d{4}$/)) {
+      const parts = dateStr.split('-');
+      date = new Date(parseInt(parts[2], 10), parseInt(parts[1], 10) - 1, parseInt(parts[0], 10));
+    }
+    // Handle MM/DD/YYYY format
+    else if (dateStr.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+      const parts = dateStr.split('/');
+      date = new Date(parseInt(parts[2], 10), parseInt(parts[0], 10) - 1, parseInt(parts[1], 10));
+    }
+    // Try standard Date parsing as fallback
+    else {
+      date = new Date(dateStr);
+    }
+    
+    // Check if date is valid
+    if (date && !isNaN(date.getTime())) {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    
+    // If all parsing fails, return the original string
+    return dateString;
+  } catch (error) {
+    // If any error occurs, return the original string
+    return dateString;
+  }
+};
+
+// Helper function to format time to 12-hour format with AM/PM
+const formatTime = (timeString) => {
+  if (!timeString) return 'N/A';
+  
+  try {
+    const timeStr = String(timeString).trim();
+    
+    // If already in 12-hour format with AM/PM, return as is
+    if (timeStr.toLowerCase().includes('am') || timeStr.toLowerCase().includes('pm')) {
+      return timeStr;
+    }
+    
+    // Handle 24-hour format (HH:MM or HH:MM:SS)
+    const timeMatch = timeStr.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (timeMatch) {
+      let hours = parseInt(timeMatch[1], 10);
+      const minutes = timeMatch[2];
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      // Convert to 12-hour format
+      hours = hours % 12;
+      hours = hours ? hours : 12; // 0 should be 12
+      
+      // Format with leading zero for hours if needed
+      return `${hours}:${minutes} ${ampm}`;
+    }
+    
+    // If format is not recognized, return as is
+    return timeStr;
+  } catch (error) {
+    // If any error occurs, return the original string
+    return timeString;
+  }
+};
+
 const generateEmailTemplate = (bookingData) => {
   const { type, route, car, traveller, date, time, serviceType } = bookingData;
   
@@ -266,11 +344,11 @@ const generateEmailTemplate = (bookingData) => {
             </div>
             <div class="detail-row">
               <span class="detail-label">Date:</span>
-              <span class="detail-value">${date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}</span>
+              <span class="detail-value">${formatDate(date)}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Time:</span>
-              <span class="detail-value">${time || 'N/A'}</span>
+              <span class="detail-value">${formatTime(time)}</span>
             </div>
           </div>
           
@@ -310,14 +388,14 @@ const generateEmailTemplate = (bookingData) => {
           <div class="footer-tagline">Your trusted travel partner</div>
           
           <div class="contact-info">
-            <div class="contact-item">📧 info.pentacab@gmail.com</div>
-            <div class="contact-item">📱 +91-7600839900</div>
-            <div class="contact-item">🌐 pentacabsfrontend-production.up.railway.app</div>
+            <div class="contact-item">📧 <a href="mailto:info.pentacab@gmail.com" style="color: white; text-decoration: none;">info.pentacab@gmail.com</a></div>
+            <div class="contact-item">📱 <a href="tel:+917600839900" style="color: white; text-decoration: none;">+91-7600839900</a></div>
+            <div class="contact-item">🌐 <a href="https://www.pentacab.com/" style="color: white; text-decoration: none;">https://www.pentacab.com/</a></div>
           </div>
           
           <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
             <p>Thank you for choosing Penta Cab! Our team will contact you shortly with driver details.</p>
-            <p style="margin-top: 8px;">© 2024 Penta Cab. All rights reserved.</p>
+            <p style="margin-top: 8px;">© 2015 Penta Cab. All rights reserved.</p>
           </div>
         </div>
       </div>
@@ -614,11 +692,11 @@ const generateAdminBookingNotificationTemplate = (bookingData) => {
             </div>
             <div class="detail-row">
               <span class="detail-label">Date:</span>
-              <span class="detail-value">${date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}</span>
+              <span class="detail-value">${formatDate(date)}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Time:</span>
-              <span class="detail-value">${time || 'N/A'}</span>
+              <span class="detail-value">${formatTime(time)}</span>
             </div>
           </div>
           
@@ -658,14 +736,14 @@ const generateAdminBookingNotificationTemplate = (bookingData) => {
           <div class="footer-tagline">Admin Notification System</div>
           
           <div class="contact-info">
-            <div class="contact-item">📧 info.pentacab@gmail.com</div>
-            <div class="contact-item">📱 +91-7600839900</div>
-            <div class="contact-item">🌐 pentacabsfrontend-production.up.railway.app</div>
+            <div class="contact-item">📧 <a href="mailto:info.pentacab@gmail.com" style="color: white; text-decoration: none;">info.pentacab@gmail.com</a></div>
+            <div class="contact-item">📱 <a href="tel:+917600839900" style="color: white; text-decoration: none;">+91-7600839900</a></div>
+            <div class="contact-item">🌐 <a href="https://www.pentacab.com/" style="color: white; text-decoration: none;">https://www.pentacab.com/</a></div>
           </div>
           
           <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
             <p>Please assign a driver and vehicle for this booking.</p>
-            <p style="margin-top: 8px;">© 2024 Penta Cab. All rights reserved.</p>
+            <p style="margin-top: 8px;">© 2015 Penta Cab. All rights reserved.</p>
           </div>
         </div>
       </div>
@@ -937,11 +1015,11 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
             </div>
             <div class="detail-row">
               <span class="detail-label">Date:</span>
-              <span class="detail-value">${date ? new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'N/A'}</span>
+              <span class="detail-value">${formatDate(date)}</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Time:</span>
-              <span class="detail-value">${time || 'N/A'}</span>
+              <span class="detail-value">${formatTime(time)}</span>
             </div>
           </div>
           
@@ -1014,14 +1092,14 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
           <div class="footer-tagline">Your trusted travel partner</div>
           
           <div class="contact-info">
-            <div class="contact-item">📧 info.pentacab@gmail.com</div>
-            <div class="contact-item">📱 +91-7600839900</div>
-            <div class="contact-item">🌐 pentacabsfrontend-production.up.railway.app</div>
+            <div class="contact-item">📧 <a href="mailto:info.pentacab@gmail.com" style="color: white; text-decoration: none;">info.pentacab@gmail.com</a></div>
+            <div class="contact-item">📱 <a href="tel:+917600839900" style="color: white; text-decoration: none;">+91-7600839900</a></div>
+            <div class="contact-item">🌐 <a href="https://www.pentacab.com/" style="color: white; text-decoration: none;">https://www.pentacab.com/</a></div>
           </div>
           
           <div style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
             <p>Safe travels! 🚗✨</p>
-            <p style="margin-top: 8px;">© 2024 Penta Cab. All rights reserved.</p>
+            <p style="margin-top: 8px;">© 2015 Penta Cab. All rights reserved.</p>
           </div>
         </div>
       </div>
