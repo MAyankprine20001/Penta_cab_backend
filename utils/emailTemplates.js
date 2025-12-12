@@ -359,7 +359,7 @@ const generateEmailTemplate = (bookingData) => {
             </div>
             <div class="detail-row">
               <span class="detail-label">Mode:</span>
-              <span class="detail-value">Cash/UPI - ${bookingData.paymentMethod === '0' ? 'Cash' : bookingData.paymentMethod === '20' ? 'UPI/Card (20% Advance)' : bookingData.paymentMethod === '100' ? 'UPI/Card (100% Advance)' : 'Cash'}</span>
+              <span class="detail-value">${bookingData.paymentMethod === '0' ? 'Cash/UPI' : bookingData.paymentMethod === '20' ? 'UPI/Card (20% Advance)' : bookingData.paymentMethod === '100' ? 'UPI/Card (100% Advance)' : 'Cash/UPI'}</span>
             </div>
             <div class="payment-status">
               Total Charges: ${bookingData.totalFare || car?.price || 0}/- INR ${bookingData.paymentMethod === '20' ? '(20% done)' : bookingData.paymentMethod === '100' ? '(100% done)' : ''}
@@ -1030,7 +1030,7 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
             </div>
             <div class="detail-row">
               <span class="detail-label">Mode:</span>
-              <span class="detail-value">Cash/UPI - ${paymentMethod === '0' ? 'Cash' : paymentMethod === '20' ? 'UPI/Card (20% Advance)' : paymentMethod === '100' ? 'UPI/Card (100% Advance)' : 'Cash'}</span>
+              <span class="detail-value">${paymentMethod === '0' ? 'Cash/UPI' : paymentMethod === '20' ? 'UPI/Card (20% Advance)' : paymentMethod === '100' ? 'UPI/Card (100% Advance)' : 'Cash/UPI'}</span>
             </div>
             <div class="payment-status">
               Total Charges: ${totalFare || car?.price || 0}/- INR ${paymentMethod === '20' ? '(20% done)' : paymentMethod === '100' ? '(100% done)' : ''}
