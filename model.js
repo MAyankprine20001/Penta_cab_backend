@@ -86,7 +86,8 @@ const bookingRequestSchema = new mongoose.Schema({
     driverDetails: {
         name: String,
         whatsappNumber: String,
-        vehicleNumber: String
+        vehicleNumber: String,
+        carName: String
     },
     adminNotes: String
 }, { timestamps: true });

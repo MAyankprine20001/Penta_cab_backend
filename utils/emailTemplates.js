@@ -890,11 +890,35 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
         }
         
         .driver-section {
-          background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+          background: linear-gradient(135deg, #1a5490 0%, #0d3a66 100%);
           color: white;
           border-radius: 8px;
           padding: 20px;
           margin-bottom: 20px;
+          border: 2px solid #2d6fb8;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .driver-section .section-title {
+          color: #ffffff !important;
+          font-size: 18px;
+          font-weight: 800;
+          text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          margin-bottom: 15px;
+        }
+        
+        .driver-section .section-icon {
+          background: #28a745;
+          color: white;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 18px;
+          margin-right: 10px;
+          vertical-align: middle;
         }
         
         .vehicle-section {
@@ -1054,17 +1078,17 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
           </div>
           
           <div class="driver-section">
-            <div class="section-title">
-              <span class="section-icon">👨‍💼</span>
-              Chauffeur Details
+            <div class="section-title" style="color: #ffffff !important; font-size: 20px; font-weight: 900; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5); margin-bottom: 18px; letter-spacing: 0.5px;">
+              <span class="section-icon" style="background: #28a745; color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 10px; vertical-align: middle; padding: 2px;">👨‍💼</span>
+              Chauffeur/Driver Details
             </div>
             <div class="detail-row">
-              <span class="detail-label">Chauffeur:</span>
-              <span class="detail-value">${driverDetails?.name || 'N/A'}</span>
+              <span class="detail-label" style="font-weight: 600; color: #fff; font-size: 14px; display: inline-block; width: 140px; white-space: nowrap;">Chauffeur:</span>
+              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${driverDetails?.name || 'N/A'}</span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Mob. No:</span>
-              <span class="detail-value">${driverDetails?.whatsappNumber || 'N/A'}</span>
+              <span class="detail-label" style="font-weight: 600; color: #fff; font-size: 14px; display: inline-block; width: 140px; white-space: nowrap;">Mob. No:</span>
+              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${driverDetails?.whatsappNumber || 'N/A'}</span>
             </div>
             <a href="https://wa.me/${driverDetails?.whatsappNumber?.replace(/[^0-9]/g, '') || ''}" class="whatsapp-button">
               💬 Contact Driver on WhatsApp
@@ -1077,12 +1101,12 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
               Vehicle Details
             </div>
             <div class="detail-row">
-              <span class="detail-label">Cab:</span>
-              <span class="detail-value">${car?.name || car?.type || 'N/A'}</span>
+              <span class="detail-label" style="font-weight: 600; color: #fff; font-size: 14px; display: inline-block; width: 140px; white-space: nowrap;">Car Name:</span>
+              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${driverDetails?.carName }</span>
             </div>
             <div class="detail-row">
-              <span class="detail-label">Reg. no/car number:</span>
-              <span class="detail-value">${driverDetails?.vehicleNumber || 'N/A'}</span>
+              <span class="detail-label" style="font-weight: 600; color: #fff; font-size: 14px; display: inline-block; width: 140px; white-space: nowrap;">Vehicle Number:</span>
+              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${driverDetails?.vehicleNumber || 'N/A'}</span>
             </div>
           </div>
         </div>
