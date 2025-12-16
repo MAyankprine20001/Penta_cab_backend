@@ -78,6 +78,19 @@ const formatTime = (timeString) => {
     return timeString;
   }
 };
+const getCabName = (cabTypeOrId) => {
+  console.log("cabTypeOrId", cabTypeOrId);
+  // Handle both cab type strings and ID strings
+
+  const cabIdMapping = {
+    1: "SEDAN",
+    2: "SUV",
+    3: "Innova",
+    4: "INNOVA CRYSTAL",
+  };
+
+  return cabIdMapping[cabTypeOrId];
+};
 
 const generateEmailTemplate = (bookingData) => {
   const { type, route, car, traveller, date, time, serviceType } = bookingData;
@@ -1003,7 +1016,7 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
         <div class="email-body">
           <div class="booking-id-section">
             <div class="booking-id-label">Booking ID</div>
-            <div class="booking-id-value">${bookingId || 'N/A'}</div>
+            <div class="booking-id-value">${bookingId || "N/A"}</div>
           </div>
           
           <div class="info-section">
@@ -1013,7 +1026,11 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
             </div>
             <div class="detail-row">
               <span class="detail-label">Type:</span>
-              <span class="detail-value">${car?.type ? car.type.toUpperCase() + ' AC taxi vehicle' : 'AC taxi vehicle'}</span>
+              <span class="detail-value"> ${
+                getCabName(car)
+                  ? `${getCabName(car)} AC taxi vehicle`
+                  : "AC taxi vehicle"
+              }</span>
             </div>
           </div>
           
@@ -1024,11 +1041,15 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
             </div>
             <div class="detail-row">
               <span class="detail-label">Name:</span>
-              <span class="detail-value">Mr/Mrs - ${traveller?.name || 'N/A'}</span>
+              <span class="detail-value">Mr/Mrs - ${
+                traveller?.name || "N/A"
+              }</span>
             </div>
             <div class="detail-row">
               <span class="detail-label">Mobile:</span>
-              <span class="detail-value">+91 ${traveller?.mobile || 'N/A'}</span>
+              <span class="detail-value">+91 ${
+                traveller?.mobile || "N/A"
+              }</span>
             </div>
           </div>
           
@@ -1054,10 +1075,24 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
             </div>
             <div class="detail-row">
               <span class="detail-label">Mode:</span>
-              <span class="detail-value">${paymentMethod === '0' ? 'Cash/UPI' : paymentMethod === '20' ? 'UPI/Card (20% Advance)' : paymentMethod === '100' ? 'UPI/Card (100% Advance)' : 'Cash/UPI'}</span>
+              <span class="detail-value">${
+                paymentMethod === "0"
+                  ? "Cash/UPI"
+                  : paymentMethod === "20"
+                  ? "UPI/Card (20% Advance)"
+                  : paymentMethod === "100"
+                  ? "UPI/Card (100% Advance)"
+                  : "Cash/UPI"
+              }</span>
             </div>
             <div class="payment-status">
-              Total Charges: ${totalFare || car?.price || 0}/- INR ${paymentMethod === '20' ? '(20% done)' : paymentMethod === '100' ? '(100% done)' : ''}
+              Total Charges: ${totalFare || car?.price || 0}/- INR ${
+    paymentMethod === "20"
+      ? "(20% done)"
+      : paymentMethod === "100"
+      ? "(100% done)"
+      : ""
+  }
             </div>
           </div>
           
@@ -1066,7 +1101,9 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
               <span class="section-icon">📍</span>
               Pickup Location
             </div>
-            <div class="detail-value">${traveller?.pickup || traveller?.pickupAddress || 'N/A'}</div>
+            <div class="detail-value">${
+              traveller?.pickup || traveller?.pickupAddress || "N/A"
+            }</div>
           </div>
           
           <div class="info-section">
@@ -1074,7 +1111,9 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
               <span class="section-icon">🎯</span>
               Drop Location
             </div>
-            <div class="detail-value">${traveller?.drop || traveller?.dropAddress || 'N/A'}</div>
+            <div class="detail-value">${
+              traveller?.drop || traveller?.dropAddress || "N/A"
+            }</div>
           </div>
           
           <div class="driver-section">
@@ -1084,13 +1123,19 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
             </div>
             <div class="detail-row">
               <span class="detail-label" style="font-weight: 600; color: #fff; font-size: 14px; display: inline-block; width: 140px; white-space: nowrap;">Chauffeur:</span>
-              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${driverDetails?.name || 'N/A'}</span>
+              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${
+                driverDetails?.name || "N/A"
+              }</span>
             </div>
             <div class="detail-row">
               <span class="detail-label" style="font-weight: 600; color: #fff; font-size: 14px; display: inline-block; width: 140px; white-space: nowrap;">Mob. No:</span>
-              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${driverDetails?.whatsappNumber || 'N/A'}</span>
+              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${
+                driverDetails?.whatsappNumber || "N/A"
+              }</span>
             </div>
-            <a href="https://wa.me/${driverDetails?.whatsappNumber?.replace(/[^0-9]/g, '') || ''}" class="whatsapp-button">
+            <a href="https://wa.me/${
+              driverDetails?.whatsappNumber?.replace(/[^0-9]/g, "") || ""
+            }" class="whatsapp-button">
               💬 Contact Driver on WhatsApp
             </a>
           </div>
@@ -1102,11 +1147,15 @@ const generateDriverDetailsTemplate = (bookingData, driverDetails) => {
             </div>
             <div class="detail-row">
               <span class="detail-label" style="font-weight: 600; color: #fff; font-size: 14px; display: inline-block; width: 140px; white-space: nowrap;">Car Name:</span>
-              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${driverDetails?.carName }</span>
+              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${
+                driverDetails?.carName
+              }</span>
             </div>
             <div class="detail-row">
               <span class="detail-label" style="font-weight: 600; color: #fff; font-size: 14px; display: inline-block; width: 140px; white-space: nowrap;">Vehicle Number:</span>
-              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${driverDetails?.vehicleNumber || 'N/A'}</span>
+              <span class="detail-value" style="color: #fff; font-size: 15px; font-weight: 600;">${
+                driverDetails?.vehicleNumber || "N/A"
+              }</span>
             </div>
           </div>
         </div>
