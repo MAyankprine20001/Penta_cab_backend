@@ -1,26 +1,33 @@
-const router = require('express').Router();
+const router = require("express").Router();
 // const transporter = require('../services/email.service');
-const sendEmail = require('../services/email.service');
-const { LocalRideEntry } = require('../model');
-const { generateBookingConfirmationTemplate, generateAdminBookingNotificationTemplate } = require('../utils/emailTemplates');
+const sendEmail = require("../services/email.service");
+const { LocalRideEntry } = require("../model");
+const {
+  generateBookingConfirmationTemplate,
+  generateAdminBookingNotificationTemplate,
+} = require("../utils/emailTemplates");
 
 // GET /api/local-services (pagination + search)
-router.get('/api/local-services', async (req, res) => {
+router.get("/api/local-services", async (req, res) => {
   try {
-    const page  = parseInt(req.query.page)  || 1;
+    const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
-    const skip  = (page - 1) * limit;
+    const skip = (page - 1) * limit;
 
     let query = {};
     if (req.query.search) {
-      query = { $or: [
-        { city:    { $regex: req.query.search, $options: 'i' } },
-        { package: { $regex: req.query.search, $options: 'i' } },
-      ]};
+      query = {
+        $or: [
+          { city: { $regex: req.query.search, $options: "i" } },
+          { package: { $regex: req.query.search, $options: "i" } },
+        ],
+      };
     }
 
     const services = await LocalRideEntry.find(query)
-      .sort({ createdAt: -1 }).skip(skip).limit(limit);
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
     const total = await LocalRideEntry.countDocuments(query);
 
     res.json({
@@ -30,145 +37,179 @@ router.get('/api/local-services', async (req, res) => {
         totalPages: Math.ceil(total / limit),
         totalServices: total,
         hasNext: page < Math.ceil(total / limit),
-        hasPrev: page > 1
-      }
+        hasPrev: page > 1,
+      },
     });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // GET one
-router.get('/api/local-services/:id', async (req, res) => {
+router.get("/api/local-services/:id", async (req, res) => {
   try {
     const service = await LocalRideEntry.findById(req.params.id);
-    if (!service) return res.status(404).json({ error: 'Service not found' });
+    if (!service) return res.status(404).json({ error: "Service not found" });
     res.json(service);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // PUT update
-router.put('/api/local-services/:id', async (req, res) => {
+router.put("/api/local-services/:id", async (req, res) => {
   try {
     const service = await LocalRideEntry.findByIdAndUpdate(
-      req.params.id, req.body, { new: true, runValidators: true }
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
     );
-    if (!service) return res.status(404).json({ error: 'Service not found' });
-    res.json({ message: 'Service updated successfully', service });
-  } catch (err) { res.status(400).json({ error: err.message }); }
+    if (!service) return res.status(404).json({ error: "Service not found" });
+    res.json({ message: "Service updated successfully", service });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 // DELETE
-router.delete('/api/local-services/:id', async (req, res) => {
+router.delete("/api/local-services/:id", async (req, res) => {
   try {
     const service = await LocalRideEntry.findByIdAndDelete(req.params.id);
-    if (!service) return res.status(404).json({ error: 'Service not found' });
-    res.json({ message: 'Service deleted successfully' });
-  } catch (err) { res.status(500).json({ error: err.message }); }
+    if (!service) return res.status(404).json({ error: "Service not found" });
+    res.json({ message: "Service deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // POST /api/local-ride/search
-router.post('/api/local-ride/search', async (req, res) => {
+router.post("/api/local-ride/search", async (req, res) => {
   const { city, package: ridePackage } = req.body;
   try {
     const entry = await LocalRideEntry.findOne({
-      city: { $regex: `^${city}$`, $options: 'i' },
+      city: { $regex: `^${city}$`, $options: "i" },
       package: ridePackage,
     });
-    if (!entry) return res.status(404).json({ message: "No rides found for the selected city and package." });
-    const availableCars = entry.cars.filter(c => c.available);
+    if (!entry)
+      return res
+        .status(404)
+        .json({ message: "No rides found for the selected city and package." });
+    const availableCars = entry.cars.filter((c) => c.available);
     res.json({ cars: availableCars });
-  } catch (err) { res.status(500).json({ error: "Server error." }); }
+  } catch (err) {
+    res.status(500).json({ error: "Server error." });
+  }
 });
 
 // GET /api/available-cities
-router.get('/api/available-cities', async (req, res) => {
+router.get("/api/available-cities", async (req, res) => {
   try {
-    const entries = await LocalRideEntry.find({ 'cars.available': true }).select('city -_id');
-    const uniqueCities = [...new Set(entries.map(e => e.city))];
+    const entries = await LocalRideEntry.find({
+      "cars.available": true,
+    }).select("city -_id");
+    const uniqueCities = [...new Set(entries.map((e) => e.city))];
     res.json({ cities: uniqueCities });
-  } catch (err) { res.status(500).json({ error: 'Internal server error' }); }
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 // POST /send-local-email
-router.post('/send-local-email', async (req, res) => {
+router.post("/send-local-email", async (req, res) => {
   try {
-    const { email, route, car, traveller, date, time, pickupTime, bookingId, paymentMethod, totalFare } = req.body;
+    const {
+      email,
+      route,
+      car,
+      traveller,
+      date,
+      time,
+      pickupTime,
+      bookingId,
+      paymentMethod,
+      totalFare,
+    } = req.body;
     if (!email || !route || !car || !traveller) {
-      return res.status(400).json({ error: 'Missing data for email' });
+      return res.status(400).json({ error: "Missing data for email" });
     }
 
     // Use time or pickupTime as fallback
-    const finalTime = time || pickupTime || '';
-    const finalDate = date || '';
+    const finalTime = time || pickupTime || "";
+    const finalDate = date || "";
 
     // Generate the modern email template
     const html = generateBookingConfirmationTemplate({
-      serviceType: 'LOCAL',
+      serviceType: "LOCAL",
       route,
       car,
       traveller: {
         ...traveller,
-        email: email
+        email: email,
       },
       date: finalDate,
       time: finalTime,
       bookingId,
       paymentMethod,
-      totalFare
+      totalFare,
     });
 
     console.log("code comes here-->>");
     // Send email to user
-    await sendEmail({ 
-      to: email, 
-      subject: '🚖 Local Ride Booking Confirmation', 
-      html 
+    await sendEmail({
+      to: email,
+      subject: "🚖 Local Ride Booking Confirmation",
+      html,
     });
-    
+
     // Generate admin-specific email template
     const adminHtml = generateAdminBookingNotificationTemplate({
-      serviceType: 'LOCAL',
+      serviceType: "LOCAL",
       route,
       car,
       traveller: {
         ...traveller,
-        email: email
+        email: email,
       },
       date: finalDate,
       time: finalTime,
       bookingId,
       paymentMethod,
-      totalFare
+      totalFare,
     });
-    
+
     // Send email to admin
     await sendEmail({
-      to: 'booking.pentacab@gmail.com',
-      subject: `🚖 New Local Booking: ${route} - ${traveller?.name || 'Customer'}`,
-      html: adminHtml
+      to: "booking@pentacab.com",
+      subject: `🚖 New Local Booking: ${route} - ${
+        traveller?.name || "Customer"
+      }`,
+      html: adminHtml,
     });
-    
-    return res.json({ message: 'Local ride email sent successfully' });
-  } catch (err) { 
-    console.error('Email sending error:', err);
-    return res.status(500).json({ error: 'Failed to send email' }); 
+
+    return res.json({ message: "Local ride email sent successfully" });
+  } catch (err) {
+    console.error("Email sending error:", err);
+    return res.status(500).json({ error: "Failed to send email" });
   }
 });
 
 // POST /send-other-local-inquiry
-router.post('/send-other-local-inquiry', async (req, res) => {
-  const { 
-    city, 
-    package: packageType, 
-    date, 
-    pickupTime, 
-    name, 
-    phoneNumber 
+router.post("/send-other-local-inquiry", async (req, res) => {
+  const {
+    city,
+    package: packageType,
+    date,
+    pickupTime,
+    name,
+    phoneNumber,
   } = req.body;
-  
+
   if (!city || !packageType || !date || !pickupTime || !name || !phoneNumber) {
-    return res.status(400).json({ error: 'Missing required fields for inquiry' });
+    return res
+      .status(400)
+      .json({ error: "Missing required fields for inquiry" });
   }
-  
+
   try {
     const inquiryHtml = `
       <!DOCTYPE html>
@@ -213,8 +254,14 @@ router.post('/send-other-local-inquiry', async (req, res) => {
               <h3 class="section-title"><span>👤</span><span>Customer Details</span></h3>
               <div class="detail-row"><span class="detail-label">Name:</span><span class="detail-value">${name}</span></div>
               <div class="detail-row"><span class="detail-label">Phone Number:</span><span class="detail-value"><a href="tel:${phoneNumber}" style="color: #28a745; text-decoration: none;">${phoneNumber}</a></span></div>
-              <div class="detail-row"><span class="detail-label">WhatsApp:</span><span class="detail-value"><a href="https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}" style="color: #25d366; text-decoration: none;">💬 Contact on WhatsApp</a></span></div>
-              <div class="detail-row"><span class="detail-label">Inquiry Time:</span><span class="detail-value">${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span></div>
+              <div class="detail-row"><span class="detail-label">WhatsApp:</span><span class="detail-value"><a href="https://wa.me/${phoneNumber.replace(
+                /[^0-9]/g,
+                ""
+              )}" style="color: #25d366; text-decoration: none;">💬 Contact on WhatsApp</a></span></div>
+              <div class="detail-row"><span class="detail-label">Inquiry Time:</span><span class="detail-value">${new Date().toLocaleString(
+                "en-IN",
+                { timeZone: "Asia/Kolkata" }
+              )}</span></div>
             </div>
           </div>
           <div class="email-footer">
@@ -225,35 +272,37 @@ router.post('/send-other-local-inquiry', async (req, res) => {
       </body>
       </html>
     `;
-    
+
     await sendEmail({
-      to: 'booking.pentacab@gmail.com',
+      to: "booking@pentacab.com",
       subject: `⚠️ Service Not Available - Local: ${city} - ${packageType} - ${name}`,
-      html: inquiryHtml
+      html: inquiryHtml,
     });
-    
+
     return res.json({ message: "Inquiry email sent to admin successfully" });
-  } catch (err) { 
-    console.error('Inquiry email sending error:', err);
-    return res.status(500).json({ error: "Failed to send inquiry email" }); 
+  } catch (err) {
+    console.error("Inquiry email sending error:", err);
+    return res.status(500).json({ error: "Failed to send inquiry email" });
   }
 });
 
 // POST /send-local-inquiry
-router.post('/send-local-inquiry', async (req, res) => {
-  const { 
-    city, 
-    package: packageType, 
-    date, 
-    pickupTime, 
-    name, 
-    phoneNumber 
+router.post("/send-local-inquiry", async (req, res) => {
+  const {
+    city,
+    package: packageType,
+    date,
+    pickupTime,
+    name,
+    phoneNumber,
   } = req.body;
-  
+
   if (!city || !packageType || !date || !pickupTime || !name || !phoneNumber) {
-    return res.status(400).json({ error: 'Missing required fields for inquiry' });
+    return res
+      .status(400)
+      .json({ error: "Missing required fields for inquiry" });
   }
-  
+
   try {
     // Generate inquiry email template
     const inquiryHtml = `
@@ -299,8 +348,14 @@ router.post('/send-local-inquiry', async (req, res) => {
               <h3 class="section-title"><span>👤</span><span>Customer Details</span></h3>
               <div class="detail-row"><span class="detail-label">Name:</span><span class="detail-value">${name}</span></div>
               <div class="detail-row"><span class="detail-label">Phone Number:</span><span class="detail-value"><a href="tel:${phoneNumber}" style="color: #28a745; text-decoration: none;">${phoneNumber}</a></span></div>
-              <div class="detail-row"><span class="detail-label">WhatsApp:</span><span class="detail-value"><a href="https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}" style="color: #25d366; text-decoration: none;">💬 Contact on WhatsApp</a></span></div>
-              <div class="detail-row"><span class="detail-label">Inquiry Time:</span><span class="detail-value">${new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</span></div>
+              <div class="detail-row"><span class="detail-label">WhatsApp:</span><span class="detail-value"><a href="https://wa.me/${phoneNumber.replace(
+                /[^0-9]/g,
+                ""
+              )}" style="color: #25d366; text-decoration: none;">💬 Contact on WhatsApp</a></span></div>
+              <div class="detail-row"><span class="detail-label">Inquiry Time:</span><span class="detail-value">${new Date().toLocaleString(
+                "en-IN",
+                { timeZone: "Asia/Kolkata" }
+              )}</span></div>
             </div>
           </div>
           <div class="email-footer">
@@ -311,18 +366,22 @@ router.post('/send-local-inquiry', async (req, res) => {
       </body>
       </html>
     `;
-    
+
     // Send inquiry email to admin
     await sendEmail({
-      to: 'booking.pentacab@gmail.com',
+      to: "booking@pentacab.com",
       subject: `🚖 New Local Inquiry: ${city} - ${packageType} - ${name}`,
-      html: inquiryHtml
+      html: inquiryHtml,
     });
-    
-    return res.json({ message: "Local inquiry email sent to admin successfully" });
-  } catch (err) { 
-    console.error('Local inquiry email sending error:', err);
-    return res.status(500).json({ error: "Failed to send local inquiry email" }); 
+
+    return res.json({
+      message: "Local inquiry email sent to admin successfully",
+    });
+  } catch (err) {
+    console.error("Local inquiry email sending error:", err);
+    return res
+      .status(500)
+      .json({ error: "Failed to send local inquiry email" });
   }
 });
 

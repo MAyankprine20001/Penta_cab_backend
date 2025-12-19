@@ -5,7 +5,7 @@ async function sendEmail({ to, subject, text, html }) {
   try {
     const result = await sgMail.send({
       to,
-      from:"booking.pentacab@gmail.com",
+      from: "booking@pentacab.com",
       subject,
       text,
       html,
