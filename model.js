@@ -123,6 +123,19 @@ const routeSchema = new mongoose.Schema({
 
 const Route = mongoose.model('Route', routeSchema);
 
+// Blog Management schema
+const blogSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    content: { type: String, required: true },
+    excerpt: { type: String, default: '' },
+    author: { type: String, default: 'Admin' },
+    status: { type: String, enum: ['published', 'draft'], default: 'draft' },
+    tags: { type: [String], default: [] },
+    publishedAt: { type: String, default: null }
+}, { timestamps: true });
+
+const Blog = mongoose.model('Blog', blogSchema);
+
 // Add this to your exports
-module.exports = { AirportEntry, OutstationEntry, LocalRideEntry, BookingRequest, SEOData, Route };
+module.exports = { AirportEntry, OutstationEntry, LocalRideEntry, BookingRequest, SEOData, Route, Blog };
 

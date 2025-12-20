@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const { Blog } = require('../model');
 
-// Blog data storage (in a real app, this would come from a database)
-let blogs = [
+// Default blogs data for seeding (if database is empty)
+const defaultBlogs = [
   {
-    id: "1",
     title: "Welcome to Penta CAB Blog",
     content: `<p>This is our first blog post about our amazing cab services. We are committed to providing the best transportation solutions for our customers.</p>
     <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=800&h=400&fit=crop" alt="Modern taxi service" style="max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0;">
@@ -20,12 +20,9 @@ let blogs = [
     author: "Admin",
     publishedAt: "2024-01-15",
     status: "published",
-    tags: ["travel", "cab", "services"],
-    createdAt: "2024-01-15T10:00:00Z",
-    updatedAt: "2024-01-15T10:00:00Z"
+    tags: ["travel", "cab", "services"]
   },
   {
-    id: "2",
     title: "Top 10 Places to Visit in Mumbai",
     content: `<p>Explore the vibrant city of Mumbai with our curated list of must-visit destinations. From historical landmarks to modern attractions, Mumbai has something for everyone.</p>
     <img src="https://images.unsplash.com/photo-1564507592333-c60657eea523?w=800&h=400&fit=crop" alt="Mumbai skyline" style="max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0;">
@@ -37,12 +34,9 @@ let blogs = [
     author: "Admin",
     publishedAt: "2024-01-10",
     status: "published",
-    tags: ["mumbai", "travel", "destinations"],
-    createdAt: "2024-01-10T10:00:00Z",
-    updatedAt: "2024-01-10T10:00:00Z"
+    tags: ["mumbai", "travel", "destinations"]
   },
   {
-    id: "3",
     title: "Best Cab Booking Tips for Travelers",
     content: `<p>Learn the essential tips for booking cabs efficiently and getting the best deals for your travel needs.</p>
     <img src="https://images.unsplash.com/photo-1570125909517-53cb21c89ff2?w=800&h=400&fit=crop" alt="Cab booking app" style="max-width: 100%; height: auto; border-radius: 8px; margin: 20px 0;">
@@ -60,14 +54,29 @@ let blogs = [
     author: "Admin",
     publishedAt: "2024-01-08",
     status: "published",
-    tags: ["tips", "booking", "travel"],
-    createdAt: "2024-01-08T10:00:00Z",
-    updatedAt: "2024-01-08T10:00:00Z"
+    tags: ["tips", "booking", "travel"]
   }
 ];
 
+// Helper function to convert MongoDB document to API format
+const formatBlog = (blog) => {
+  if (!blog) return null;
+  return {
+    id: blog._id.toString(),
+    title: blog.title,
+    content: blog.content,
+    excerpt: blog.excerpt || '',
+    author: blog.author || 'Admin',
+    status: blog.status || 'draft',
+    tags: blog.tags || [],
+    publishedAt: blog.publishedAt || null,
+    createdAt: blog.createdAt ? blog.createdAt.toISOString() : new Date().toISOString(),
+    updatedAt: blog.updatedAt ? blog.updatedAt.toISOString() : new Date().toISOString()
+  };
+};
+
 // Get all blogs with enhanced pagination
-router.get('/blogs', (req, res) => {
+router.get('/blogs', async (req, res) => {
   try {
     const { 
       status, 
@@ -79,78 +88,55 @@ router.get('/blogs', (req, res) => {
       author 
     } = req.query;
     
-    let filteredBlogs = [...blogs];
+    // Build query
+    let query = {};
     
     // Filter by status
     if (status && status !== 'all') {
-      filteredBlogs = filteredBlogs.filter(blog => blog.status === status);
+      query.status = status;
     }
     
     // Filter by author
     if (author) {
-      filteredBlogs = filteredBlogs.filter(blog => 
-        blog.author.toLowerCase().includes(author.toLowerCase())
-      );
+      query.author = { $regex: author, $options: 'i' };
     }
     
-    // Search functionality (searches in title, excerpt, content, and tags)
+    // Search functionality
     if (search) {
       const searchTerm = search.toLowerCase();
-      filteredBlogs = filteredBlogs.filter(blog => 
-        blog.title.toLowerCase().includes(searchTerm) ||
-        blog.excerpt.toLowerCase().includes(searchTerm) ||
-        blog.content.toLowerCase().includes(searchTerm) ||
-        blog.tags.some(tag => tag.toLowerCase().includes(searchTerm))
-      );
+      query.$or = [
+        { title: { $regex: searchTerm, $options: 'i' } },
+        { excerpt: { $regex: searchTerm, $options: 'i' } },
+        { content: { $regex: searchTerm, $options: 'i' } },
+        { tags: { $in: [new RegExp(searchTerm, 'i')] } }
+      ];
     }
     
-    // Sorting functionality
-    filteredBlogs.sort((a, b) => {
-      let aValue, bValue;
-      
-      switch (sortBy) {
-        case 'title':
-          aValue = a.title.toLowerCase();
-          bValue = b.title.toLowerCase();
-          break;
-        case 'author':
-          aValue = a.author.toLowerCase();
-          bValue = b.author.toLowerCase();
-          break;
-        case 'status':
-          aValue = a.status;
-          bValue = b.status;
-          break;
-        case 'publishedAt':
-          aValue = new Date(a.publishedAt || a.createdAt);
-          bValue = new Date(b.publishedAt || b.createdAt);
-          break;
-        case 'updatedAt':
-          aValue = new Date(a.updatedAt);
-          bValue = new Date(b.updatedAt);
-          break;
-        default: // createdAt
-          aValue = new Date(a.createdAt);
-          bValue = new Date(b.createdAt);
-      }
-      
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-      } else {
-        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-      }
-    });
+    // Build sort object
+    const sortObj = {};
+    const sortField = sortBy === 'createdAt' ? 'createdAt' : 
+                     sortBy === 'updatedAt' ? 'updatedAt' :
+                     sortBy === 'publishedAt' ? 'publishedAt' :
+                     sortBy;
+    sortObj[sortField] = sortOrder === 'asc' ? 1 : -1;
     
     // Calculate pagination
     const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit))); // Max 100 items per page
-    const total = filteredBlogs.length;
-    const totalPages = Math.ceil(total / limitNum);
-    const startIndex = (pageNum - 1) * limitNum;
-    const endIndex = startIndex + limitNum;
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+    const skip = (pageNum - 1) * limitNum;
     
-    // Get paginated data
-    const paginatedBlogs = filteredBlogs.slice(startIndex, endIndex);
+    // Get total count
+    const total = await Blog.countDocuments(query);
+    const totalPages = Math.ceil(total / limitNum);
+    
+    // Fetch blogs
+    const blogs = await Blog.find(query)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limitNum);
+    
+    // Format blogs for API response
+    const formattedBlogs = blogs.map(formatBlog);
     
     // Calculate pagination metadata
     const hasNextPage = pageNum < totalPages;
@@ -160,14 +146,14 @@ router.get('/blogs', (req, res) => {
     
     // Count blogs by status
     const statusCounts = {
-      total: blogs.length,
-      published: blogs.filter(b => b.status === 'published').length,
-      draft: blogs.filter(b => b.status === 'draft').length
+      total: await Blog.countDocuments({}),
+      published: await Blog.countDocuments({ status: 'published' }),
+      draft: await Blog.countDocuments({ status: 'draft' })
     };
     
     res.json({
       success: true,
-      data: paginatedBlogs,
+      data: formattedBlogs,
       pagination: {
         total,
         totalPages,
@@ -177,8 +163,8 @@ router.get('/blogs', (req, res) => {
         hasPrevPage,
         nextPage,
         prevPage,
-        startIndex: startIndex + 1,
-        endIndex: Math.min(endIndex, total)
+        startIndex: skip + 1,
+        endIndex: Math.min(skip + limitNum, total)
       },
       statusCounts,
       filters: {
@@ -200,10 +186,10 @@ router.get('/blogs', (req, res) => {
 });
 
 // Get single blog by ID
-router.get('/blogs/:id', (req, res) => {
+router.get('/blogs/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const blog = blogs.find(b => b.id === id);
+    const blog = await Blog.findById(id);
     
     if (!blog) {
       return res.status(404).json({
@@ -214,7 +200,7 @@ router.get('/blogs/:id', (req, res) => {
     
     res.json({
       success: true,
-      data: blog
+      data: formatBlog(blog)
     });
   } catch (error) {
     console.error('Error fetching blog:', error);
@@ -227,7 +213,7 @@ router.get('/blogs/:id', (req, res) => {
 });
 
 // Create new blog
-router.post('/blogs', (req, res) => {
+router.post('/blogs', async (req, res) => {
   try {
     const { title, content, excerpt, author, status, tags } = req.body;
     
@@ -239,25 +225,22 @@ router.post('/blogs', (req, res) => {
       });
     }
     
-    const newBlog = {
-      id: Date.now().toString(),
+    const newBlog = new Blog({
       title,
       content,
       excerpt: excerpt || content.replace(/<[^>]*>/g, '').substring(0, 150) + '...',
       author: author || 'Admin',
       status: status || 'draft',
       tags: tags || [],
-      publishedAt: status === 'published' ? new Date().toISOString().split('T')[0] : null,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+      publishedAt: status === 'published' ? new Date().toISOString().split('T')[0] : null
+    });
     
-    blogs.push(newBlog);
+    await newBlog.save();
     
     res.status(201).json({
       success: true,
       message: 'Blog post created successfully',
-      data: newBlog
+      data: formatBlog(newBlog)
     });
   } catch (error) {
     console.error('Error creating blog:', error);
@@ -270,41 +253,39 @@ router.post('/blogs', (req, res) => {
 });
 
 // Update blog
-router.put('/blogs/:id', (req, res) => {
+router.put('/blogs/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { title, content, excerpt, author, status, tags } = req.body;
     
-    const blogIndex = blogs.findIndex(b => b.id === id);
+    const blog = await Blog.findById(id);
     
-    if (blogIndex === -1) {
+    if (!blog) {
       return res.status(404).json({
         success: false,
         message: 'Blog post not found'
       });
     }
     
-    // Update blog
-    const updatedBlog = {
-      ...blogs[blogIndex],
-      title: title || blogs[blogIndex].title,
-      content: content || blogs[blogIndex].content,
-      excerpt: excerpt || blogs[blogIndex].excerpt,
-      author: author || blogs[blogIndex].author,
-      status: status || blogs[blogIndex].status,
-      tags: tags || blogs[blogIndex].tags,
-      publishedAt: status === 'published' && blogs[blogIndex].status !== 'published' 
-        ? new Date().toISOString().split('T')[0] 
-        : blogs[blogIndex].publishedAt,
-      updatedAt: new Date().toISOString()
-    };
+    // Update blog fields
+    if (title) blog.title = title;
+    if (content) blog.content = content;
+    if (excerpt !== undefined) blog.excerpt = excerpt;
+    if (author) blog.author = author;
+    if (status) blog.status = status;
+    if (tags !== undefined) blog.tags = tags;
     
-    blogs[blogIndex] = updatedBlog;
+    // Update publishedAt if status changed to published
+    if (status === 'published' && blog.status !== 'published') {
+      blog.publishedAt = new Date().toISOString().split('T')[0];
+    }
+    
+    await blog.save();
     
     res.json({
       success: true,
       message: 'Blog post updated successfully',
-      data: updatedBlog
+      data: formatBlog(blog)
     });
   } catch (error) {
     console.error('Error updating blog:', error);
@@ -317,19 +298,17 @@ router.put('/blogs/:id', (req, res) => {
 });
 
 // Delete blog
-router.delete('/blogs/:id', (req, res) => {
+router.delete('/blogs/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const blogIndex = blogs.findIndex(b => b.id === id);
+    const blog = await Blog.findByIdAndDelete(id);
     
-    if (blogIndex === -1) {
+    if (!blog) {
       return res.status(404).json({
         success: false,
         message: 'Blog post not found'
       });
     }
-    
-    blogs.splice(blogIndex, 1);
     
     res.json({
       success: true,
@@ -346,33 +325,38 @@ router.delete('/blogs/:id', (req, res) => {
 });
 
 // Toggle blog status (publish/unpublish)
-router.patch('/blogs/:id/status', (req, res) => {
+router.patch('/blogs/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
     
-    const blogIndex = blogs.findIndex(b => b.id === id);
+    if (!status || !['published', 'draft'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid status (published/draft) is required'
+      });
+    }
     
-    if (blogIndex === -1) {
+    const blog = await Blog.findById(id);
+    
+    if (!blog) {
       return res.status(404).json({
         success: false,
         message: 'Blog post not found'
       });
     }
     
-    const updatedBlog = {
-      ...blogs[blogIndex],
-      status: status,
-      publishedAt: status === 'published' ? new Date().toISOString().split('T')[0] : blogs[blogIndex].publishedAt,
-      updatedAt: new Date().toISOString()
-    };
+    blog.status = status;
+    if (status === 'published' && !blog.publishedAt) {
+      blog.publishedAt = new Date().toISOString().split('T')[0];
+    }
     
-    blogs[blogIndex] = updatedBlog;
+    await blog.save();
     
     res.json({
       success: true,
       message: `Blog post ${status === 'published' ? 'published' : 'unpublished'} successfully`,
-      data: updatedBlog
+      data: formatBlog(blog)
     });
   } catch (error) {
     console.error('Error toggling blog status:', error);
@@ -385,34 +369,38 @@ router.patch('/blogs/:id/status', (req, res) => {
 });
 
 // Get blog statistics
-router.get('/blogs/stats/summary', (req, res) => {
+router.get('/blogs/stats/summary', async (req, res) => {
   try {
-    const totalBlogs = blogs.length;
-    const publishedBlogs = blogs.filter(b => b.status === 'published').length;
-    const draftBlogs = blogs.filter(b => b.status === 'draft').length;
+    const totalBlogs = await Blog.countDocuments({});
+    const publishedBlogs = await Blog.countDocuments({ status: 'published' });
+    const draftBlogs = await Blog.countDocuments({ status: 'draft' });
     
     // Get recent blogs (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const recentBlogs = blogs.filter(b => new Date(b.createdAt) > sevenDaysAgo).length;
+    const recentBlogs = await Blog.countDocuments({
+      createdAt: { $gte: sevenDaysAgo }
+    });
     
     // Get blogs by author
-    const authorStats = blogs.reduce((acc, blog) => {
-      acc[blog.author] = (acc[blog.author] || 0) + 1;
-      return acc;
-    }, {});
+    const blogs = await Blog.find({}).select('author');
+    const authorStats = {};
+    blogs.forEach(blog => {
+      authorStats[blog.author] = (authorStats[blog.author] || 0) + 1;
+    });
     
     // Get blogs by month (for the last 6 months)
-    const monthlyStats = {};
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     
-    blogs.forEach(blog => {
-      const blogDate = new Date(blog.createdAt);
-      if (blogDate > sixMonthsAgo) {
-        const monthKey = blogDate.toISOString().slice(0, 7); // YYYY-MM format
-        monthlyStats[monthKey] = (monthlyStats[monthKey] || 0) + 1;
-      }
+    const monthlyBlogs = await Blog.find({
+      createdAt: { $gte: sixMonthsAgo }
+    }).select('createdAt');
+    
+    const monthlyStats = {};
+    monthlyBlogs.forEach(blog => {
+      const monthKey = blog.createdAt.toISOString().slice(0, 7); // YYYY-MM format
+      monthlyStats[monthKey] = (monthlyStats[monthKey] || 0) + 1;
     });
     
     res.json({
@@ -437,7 +425,7 @@ router.get('/blogs/stats/summary', (req, res) => {
 });
 
 // Bulk operations for blogs
-router.post('/blogs/bulk', (req, res) => {
+router.post('/blogs/bulk', async (req, res) => {
   try {
     const { operation, blogIds, data } = req.body;
     
@@ -454,13 +442,8 @@ router.post('/blogs/bulk', (req, res) => {
     switch (operation) {
       case 'delete':
         // Bulk delete
-        blogIds.forEach(id => {
-          const index = blogs.findIndex(b => b.id === id);
-          if (index !== -1) {
-            blogs.splice(index, 1);
-            deletedCount++;
-          }
-        });
+        const deleteResult = await Blog.deleteMany({ _id: { $in: blogIds } });
+        deletedCount = deleteResult.deletedCount;
         break;
         
       case 'updateStatus':
@@ -472,18 +455,18 @@ router.post('/blogs/bulk', (req, res) => {
           });
         }
         
-        blogIds.forEach(id => {
-          const index = blogs.findIndex(b => b.id === id);
-          if (index !== -1) {
-            blogs[index] = {
-              ...blogs[index],
-              status: data.status,
-              publishedAt: data.status === 'published' ? new Date().toISOString().split('T')[0] : blogs[index].publishedAt,
-              updatedAt: new Date().toISOString()
-            };
-            updatedBlogs.push(blogs[index]);
-          }
-        });
+        const updateData = { status: data.status };
+        if (data.status === 'published') {
+          updateData.publishedAt = new Date().toISOString().split('T')[0];
+        }
+        
+        await Blog.updateMany(
+          { _id: { $in: blogIds } },
+          { $set: updateData }
+        );
+        
+        const updatedStatusBlogs = await Blog.find({ _id: { $in: blogIds } });
+        updatedBlogs = updatedStatusBlogs.map(formatBlog);
         break;
         
       case 'updateAuthor':
@@ -495,17 +478,13 @@ router.post('/blogs/bulk', (req, res) => {
           });
         }
         
-        blogIds.forEach(id => {
-          const index = blogs.findIndex(b => b.id === id);
-          if (index !== -1) {
-            blogs[index] = {
-              ...blogs[index],
-              author: data.author,
-              updatedAt: new Date().toISOString()
-            };
-            updatedBlogs.push(blogs[index]);
-          }
-        });
+        await Blog.updateMany(
+          { _id: { $in: blogIds } },
+          { $set: { author: data.author } }
+        );
+        
+        const updatedAuthorBlogs = await Blog.find({ _id: { $in: blogIds } });
+        updatedBlogs = updatedAuthorBlogs.map(formatBlog);
         break;
         
       default:
@@ -529,6 +508,36 @@ router.post('/blogs/bulk', (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to perform bulk operation',
+      error: error.message
+    });
+  }
+});
+
+// Seed default blogs (optional endpoint for initial setup)
+router.post('/blogs/seed', async (req, res) => {
+  try {
+    const existingCount = await Blog.countDocuments({});
+    
+    if (existingCount > 0) {
+      return res.json({
+        success: true,
+        message: 'Blogs already exist in database. Skipping seed.',
+        existingCount
+      });
+    }
+    
+    const seededBlogs = await Blog.insertMany(defaultBlogs);
+    
+    res.json({
+      success: true,
+      message: `Successfully seeded ${seededBlogs.length} default blogs`,
+      count: seededBlogs.length
+    });
+  } catch (error) {
+    console.error('Error seeding blogs:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to seed blogs',
       error: error.message
     });
   }
