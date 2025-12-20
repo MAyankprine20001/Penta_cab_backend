@@ -107,6 +107,22 @@ const seoDataSchema = new mongoose.Schema({
 
 const SEOData = mongoose.model('SEOData', seoDataSchema);
 
+// Route Management schema
+const routeSchema = new mongoose.Schema({
+    routeName: { type: String, required: true },
+    from: { type: String, required: true },
+    to: { type: String, required: true },
+    description: { type: String, default: '' },
+    seoTitle: { type: String, default: '' },
+    seoDescription: { type: String, default: '' },
+    seoKeywords: { type: [String], default: [] },
+    status: { type: String, enum: ['active', 'inactive'], default: 'active' },
+    tags: { type: [String], default: [] },
+    lastBooking: { type: String, default: () => new Date().toISOString().split('T')[0] }
+}, { timestamps: true });
+
+const Route = mongoose.model('Route', routeSchema);
+
 // Add this to your exports
-module.exports = { AirportEntry, OutstationEntry, LocalRideEntry, BookingRequest, SEOData };
+module.exports = { AirportEntry, OutstationEntry, LocalRideEntry, BookingRequest, SEOData, Route };
 

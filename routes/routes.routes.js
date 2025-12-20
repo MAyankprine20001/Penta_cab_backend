@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const { Route } = require('../model');
 
-// Route data storage (in a real app, this would come from a database)
-let routes = [
+// Default routes data for seeding (if database is empty)
+const defaultRoutes = [
   {
-    id: "1",
     routeName: "Ahmedabad to Mumbai",
     from: "Ahmedabad",
     to: "Mumbai",
@@ -23,12 +23,9 @@ let routes = [
     seoKeywords: ["ahmedabad to mumbai cab", "mumbai cab service", "intercity travel", "cab booking"],
     status: "active",
     tags: ["intercity", "mumbai", "ahmedabad", "outstation"],
-    lastBooking: "2024-01-18",
-    createdAt: "2023-12-01T10:00:00Z",
-    updatedAt: "2023-12-01T10:00:00Z"
+    lastBooking: "2024-01-18"
   },
   {
-    id: "2",
     routeName: "Mumbai Airport Transfer",
     from: "Mumbai Airport",
     to: "Mumbai City",
@@ -46,12 +43,9 @@ let routes = [
     seoKeywords: ["mumbai airport transfer", "airport cab mumbai", "mumbai airport taxi", "airport pickup"],
     status: "active",
     tags: ["airport", "mumbai", "transfer", "pickup"],
-    lastBooking: "2024-01-19",
-    createdAt: "2023-11-15T10:00:00Z",
-    updatedAt: "2023-11-15T10:00:00Z"
+    lastBooking: "2024-01-19"
   },
   {
-    id: "3",
     routeName: "Local City Tour",
     from: "City Center",
     to: "Various Locations",
@@ -69,12 +63,9 @@ let routes = [
     seoKeywords: ["city tour", "local sightseeing", "tour packages", "city exploration"],
     status: "active",
     tags: ["local", "tour", "sightseeing", "city"],
-    lastBooking: "2024-01-17",
-    createdAt: "2023-10-20T10:00:00Z",
-    updatedAt: "2023-10-20T10:00:00Z"
+    lastBooking: "2024-01-17"
   },
   {
-    id: "4",
     routeName: "Delhi to Jaipur",
     from: "Delhi",
     to: "Jaipur",
@@ -92,12 +83,9 @@ let routes = [
     seoKeywords: ["delhi to jaipur cab", "jaipur round trip", "rajasthan travel", "pink city tour"],
     status: "active",
     tags: ["delhi", "jaipur", "round trip", "rajasthan"],
-    lastBooking: "2024-01-10",
-    createdAt: "2023-12-15T10:00:00Z",
-    updatedAt: "2023-12-15T10:00:00Z"
+    lastBooking: "2024-01-10"
   },
   {
-    id: "5",
     routeName: "Mumbai to Pune",
     from: "Mumbai",
     to: "Pune",
@@ -115,14 +103,32 @@ let routes = [
     seoKeywords: ["mumbai to pune cab", "pune travel", "express highway", "business travel"],
     status: "active",
     tags: ["mumbai", "pune", "express", "business"],
-    lastBooking: "2024-01-20",
-    createdAt: "2023-12-20T10:00:00Z",
-    updatedAt: "2023-12-20T10:00:00Z"
+    lastBooking: "2024-01-20"
   }
 ];
 
+// Helper function to convert MongoDB document to API format
+const formatRoute = (route) => {
+  if (!route) return null;
+  return {
+    id: route._id.toString(),
+    routeName: route.routeName,
+    from: route.from,
+    to: route.to,
+    description: route.description || '',
+    seoTitle: route.seoTitle || '',
+    seoDescription: route.seoDescription || '',
+    seoKeywords: route.seoKeywords || [],
+    status: route.status || 'active',
+    tags: route.tags || [],
+    lastBooking: route.lastBooking || new Date().toISOString().split('T')[0],
+    createdAt: route.createdAt ? route.createdAt.toISOString() : new Date().toISOString(),
+    updatedAt: route.updatedAt ? route.updatedAt.toISOString() : new Date().toISOString()
+  };
+};
+
 // Get all routes with enhanced pagination
-router.get('/routes', (req, res) => {
+router.get('/routes', async (req, res) => {
   try {
     const { 
       status, 
@@ -133,77 +139,51 @@ router.get('/routes', (req, res) => {
       sortOrder = 'desc'
     } = req.query;
     
-    let filteredRoutes = [...routes];
+    // Build query
+    let query = {};
     
     // Filter by status
     if (status && status !== 'all') {
-      filteredRoutes = filteredRoutes.filter(route => route.status === status);
+      query.status = status;
     }
     
-    
-    // Search functionality (searches in routeName, from, to, description, and tags)
+    // Search functionality
     if (search) {
       const searchTerm = search.toLowerCase();
-      filteredRoutes = filteredRoutes.filter(route => 
-        route.routeName.toLowerCase().includes(searchTerm) ||
-        route.from.toLowerCase().includes(searchTerm) ||
-        route.to.toLowerCase().includes(searchTerm) ||
-        route.description.toLowerCase().includes(searchTerm) ||
-        route.tags.some(tag => tag.toLowerCase().includes(searchTerm))
-      );
+      query.$or = [
+        { routeName: { $regex: searchTerm, $options: 'i' } },
+        { from: { $regex: searchTerm, $options: 'i' } },
+        { to: { $regex: searchTerm, $options: 'i' } },
+        { description: { $regex: searchTerm, $options: 'i' } },
+        { tags: { $in: [new RegExp(searchTerm, 'i')] } }
+      ];
     }
     
-    // Sorting functionality
-    filteredRoutes.sort((a, b) => {
-      let aValue, bValue;
-      
-      switch (sortBy) {
-        case 'routeName':
-          aValue = a.routeName.toLowerCase();
-          bValue = b.routeName.toLowerCase();
-          break;
-        case 'from':
-          aValue = a.from.toLowerCase();
-          bValue = b.from.toLowerCase();
-          break;
-        case 'to':
-          aValue = a.to.toLowerCase();
-          bValue = b.to.toLowerCase();
-          break;
-        case 'status':
-          aValue = a.status;
-          bValue = b.status;
-          break;
-        case 'lastBooking':
-          aValue = new Date(a.lastBooking);
-          bValue = new Date(b.lastBooking);
-          break;
-        case 'updatedAt':
-          aValue = new Date(a.updatedAt);
-          bValue = new Date(b.updatedAt);
-          break;
-        default: // createdAt
-          aValue = new Date(a.createdAt);
-          bValue = new Date(b.createdAt);
-      }
-      
-      if (sortOrder === 'asc') {
-        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
-      } else {
-        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
-      }
-    });
+    // Build sort object
+    const sortObj = {};
+    const sortField = sortBy === 'createdAt' ? 'createdAt' : 
+                     sortBy === 'updatedAt' ? 'updatedAt' :
+                     sortBy === 'lastBooking' ? 'lastBooking' :
+                     sortBy;
+    sortObj[sortField] = sortOrder === 'asc' ? 1 : -1;
     
     // Calculate pagination
     const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit))); // Max 100 items per page
-    const total = filteredRoutes.length;
-    const totalPages = Math.ceil(total / limitNum);
-    const startIndex = (pageNum - 1) * limitNum;
-    const endIndex = startIndex + limitNum;
+    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+    const skip = (pageNum - 1) * limitNum;
     
-    // Get paginated data
-    const paginatedRoutes = filteredRoutes.slice(startIndex, endIndex);
+    // Get total count
+    const total = await Route.countDocuments(query);
+    const totalPages = Math.ceil(total / limitNum);
+    
+    // Fetch routes
+    const routes = await Route.find(query)
+      .sort(sortObj)
+      .skip(skip)
+      .limit(limitNum);
+    
+    // Format routes for API response
+    const formattedRoutes = routes.map(formatRoute);
     
     // Calculate pagination metadata
     const hasNextPage = pageNum < totalPages;
@@ -213,14 +193,14 @@ router.get('/routes', (req, res) => {
     
     // Count routes by status
     const statusCounts = {
-      total: routes.length,
-      active: routes.filter(r => r.status === 'active').length,
-      inactive: routes.filter(r => r.status === 'inactive').length
+      total: await Route.countDocuments({}),
+      active: await Route.countDocuments({ status: 'active' }),
+      inactive: await Route.countDocuments({ status: 'inactive' })
     };
     
     res.json({
       success: true,
-      data: paginatedRoutes,
+      data: formattedRoutes,
       pagination: {
         total,
         totalPages,
@@ -230,8 +210,8 @@ router.get('/routes', (req, res) => {
         hasPrevPage,
         nextPage,
         prevPage,
-        startIndex: startIndex + 1,
-        endIndex: Math.min(endIndex, total)
+        startIndex: skip + 1,
+        endIndex: Math.min(skip + limitNum, total)
       },
       statusCounts,
       filters: {
@@ -252,10 +232,10 @@ router.get('/routes', (req, res) => {
 });
 
 // Get single route by ID
-router.get('/routes/:id', (req, res) => {
+router.get('/routes/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const route = routes.find(r => r.id === id);
+    const route = await Route.findById(id);
     
     if (!route) {
       return res.status(404).json({
@@ -266,7 +246,7 @@ router.get('/routes/:id', (req, res) => {
     
     res.json({
       success: true,
-      data: route
+      data: formatRoute(route)
     });
   } catch (error) {
     console.error('Error fetching route:', error);
@@ -279,7 +259,7 @@ router.get('/routes/:id', (req, res) => {
 });
 
 // Create new route
-router.post('/routes', (req, res) => {
+router.post('/routes', async (req, res) => {
   try {
     const { 
       routeName, 
@@ -301,8 +281,7 @@ router.post('/routes', (req, res) => {
       });
     }
     
-    const newRoute = {
-      id: Date.now().toString(),
+    const newRoute = new Route({
       routeName,
       from,
       to,
@@ -312,17 +291,15 @@ router.post('/routes', (req, res) => {
       seoKeywords: seoKeywords || [],
       status: status || 'active',
       tags: tags || [],
-      lastBooking: new Date().toISOString().split('T')[0],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+      lastBooking: new Date().toISOString().split('T')[0]
+    });
     
-    routes.push(newRoute);
+    await newRoute.save();
     
     res.status(201).json({
       success: true,
       message: 'Route created successfully',
-      data: newRoute
+      data: formatRoute(newRoute)
     });
   } catch (error) {
     console.error('Error creating route:', error);
@@ -335,7 +312,7 @@ router.post('/routes', (req, res) => {
 });
 
 // Update route
-router.put('/routes/:id', (req, res) => {
+router.put('/routes/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const { 
@@ -350,36 +327,32 @@ router.put('/routes/:id', (req, res) => {
       tags 
     } = req.body;
     
-    const routeIndex = routes.findIndex(r => r.id === id);
+    const route = await Route.findById(id);
     
-    if (routeIndex === -1) {
+    if (!route) {
       return res.status(404).json({
         success: false,
         message: 'Route not found'
       });
     }
     
-    // Update route
-    const updatedRoute = {
-      ...routes[routeIndex],
-      routeName: routeName || routes[routeIndex].routeName,
-      from: from || routes[routeIndex].from,
-      to: to || routes[routeIndex].to,
-      description: description || routes[routeIndex].description,
-      seoTitle: seoTitle || routes[routeIndex].seoTitle,
-      seoDescription: seoDescription || routes[routeIndex].seoDescription,
-      seoKeywords: seoKeywords || routes[routeIndex].seoKeywords,
-      status: status || routes[routeIndex].status,
-      tags: tags || routes[routeIndex].tags,
-      updatedAt: new Date().toISOString()
-    };
+    // Update route fields
+    if (routeName) route.routeName = routeName;
+    if (from) route.from = from;
+    if (to) route.to = to;
+    if (description !== undefined) route.description = description;
+    if (seoTitle !== undefined) route.seoTitle = seoTitle;
+    if (seoDescription !== undefined) route.seoDescription = seoDescription;
+    if (seoKeywords !== undefined) route.seoKeywords = seoKeywords;
+    if (status) route.status = status;
+    if (tags !== undefined) route.tags = tags;
     
-    routes[routeIndex] = updatedRoute;
+    await route.save();
     
     res.json({
       success: true,
       message: 'Route updated successfully',
-      data: updatedRoute
+      data: formatRoute(route)
     });
   } catch (error) {
     console.error('Error updating route:', error);
@@ -392,19 +365,17 @@ router.put('/routes/:id', (req, res) => {
 });
 
 // Delete route
-router.delete('/routes/:id', (req, res) => {
+router.delete('/routes/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const routeIndex = routes.findIndex(r => r.id === id);
+    const route = await Route.findByIdAndDelete(id);
     
-    if (routeIndex === -1) {
+    if (!route) {
       return res.status(404).json({
         success: false,
         message: 'Route not found'
       });
     }
-    
-    routes.splice(routeIndex, 1);
     
     res.json({
       success: true,
@@ -421,32 +392,34 @@ router.delete('/routes/:id', (req, res) => {
 });
 
 // Toggle route status (active/inactive)
-router.patch('/routes/:id/status', (req, res) => {
+router.patch('/routes/:id/status', async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
     
-    const routeIndex = routes.findIndex(r => r.id === id);
+    if (!status || !['active', 'inactive'].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid status (active/inactive) is required'
+      });
+    }
     
-    if (routeIndex === -1) {
+    const route = await Route.findById(id);
+    
+    if (!route) {
       return res.status(404).json({
         success: false,
         message: 'Route not found'
       });
     }
     
-    const updatedRoute = {
-      ...routes[routeIndex],
-      status: status,
-      updatedAt: new Date().toISOString()
-    };
-    
-    routes[routeIndex] = updatedRoute;
+    route.status = status;
+    await route.save();
     
     res.json({
       success: true,
       message: `Route ${status === 'active' ? 'activated' : 'deactivated'} successfully`,
-      data: updatedRoute
+      data: formatRoute(route)
     });
   } catch (error) {
     console.error('Error toggling route status:', error);
@@ -459,34 +432,31 @@ router.patch('/routes/:id/status', (req, res) => {
 });
 
 // Get route statistics
-router.get('/routes/stats/summary', (req, res) => {
+router.get('/routes/stats/summary', async (req, res) => {
   try {
-    const totalRoutes = routes.length;
-    const activeRoutes = routes.filter(r => r.status === 'active').length;
-    const inactiveRoutes = routes.filter(r => r.status === 'inactive').length;
+    const totalRoutes = await Route.countDocuments({});
+    const activeRoutes = await Route.countDocuments({ status: 'active' });
+    const inactiveRoutes = await Route.countDocuments({ status: 'inactive' });
     
     // Get recent routes (last 7 days)
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-    const recentRoutes = routes.filter(r => new Date(r.createdAt) > sevenDaysAgo).length;
-    
-    // Get routes by type
-    const typeStats = routes.reduce((acc, route) => {
-      acc[route.type] = (acc[route.type] || 0) + 1;
-      return acc;
-    }, {});
+    const recentRoutes = await Route.countDocuments({
+      createdAt: { $gte: sevenDaysAgo }
+    });
     
     // Get routes by month (for the last 6 months)
-    const monthlyStats = {};
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     
+    const routes = await Route.find({
+      createdAt: { $gte: sixMonthsAgo }
+    }).select('createdAt');
+    
+    const monthlyStats = {};
     routes.forEach(route => {
-      const routeDate = new Date(route.createdAt);
-      if (routeDate > sixMonthsAgo) {
-        const monthKey = routeDate.toISOString().slice(0, 7); // YYYY-MM format
-        monthlyStats[monthKey] = (monthlyStats[monthKey] || 0) + 1;
-      }
+      const monthKey = route.createdAt.toISOString().slice(0, 7); // YYYY-MM format
+      monthlyStats[monthKey] = (monthlyStats[monthKey] || 0) + 1;
     });
     
     res.json({
@@ -496,7 +466,7 @@ router.get('/routes/stats/summary', (req, res) => {
         active: activeRoutes,
         inactive: inactiveRoutes,
         recent: recentRoutes,
-        typeStats,
+        typeStats: {}, // Not used in current schema
         monthlyStats
       }
     });
@@ -511,7 +481,7 @@ router.get('/routes/stats/summary', (req, res) => {
 });
 
 // Bulk operations for routes
-router.post('/routes/bulk', (req, res) => {
+router.post('/routes/bulk', async (req, res) => {
   try {
     const { operation, routeIds, data } = req.body;
     
@@ -528,13 +498,8 @@ router.post('/routes/bulk', (req, res) => {
     switch (operation) {
       case 'delete':
         // Bulk delete
-        routeIds.forEach(id => {
-          const index = routes.findIndex(r => r.id === id);
-          if (index !== -1) {
-            routes.splice(index, 1);
-            deletedCount++;
-          }
-        });
+        const deleteResult = await Route.deleteMany({ _id: { $in: routeIds } });
+        deletedCount = deleteResult.deletedCount;
         break;
         
       case 'updateStatus':
@@ -546,21 +511,17 @@ router.post('/routes/bulk', (req, res) => {
           });
         }
         
-        routeIds.forEach(id => {
-          const index = routes.findIndex(r => r.id === id);
-          if (index !== -1) {
-            routes[index] = {
-              ...routes[index],
-              status: data.status,
-              updatedAt: new Date().toISOString()
-            };
-            updatedRoutes.push(routes[index]);
-          }
-        });
+        await Route.updateMany(
+          { _id: { $in: routeIds } },
+          { $set: { status: data.status } }
+        );
+        
+        const updatedStatusRoutes = await Route.find({ _id: { $in: routeIds } });
+        updatedRoutes = updatedStatusRoutes.map(formatRoute);
         break;
         
       case 'updateType':
-        // Bulk type update
+        // Bulk type update (if type field exists in future)
         if (!data || !data.type) {
           return res.status(400).json({
             success: false,
@@ -568,17 +529,13 @@ router.post('/routes/bulk', (req, res) => {
           });
         }
         
-        routeIds.forEach(id => {
-          const index = routes.findIndex(r => r.id === id);
-          if (index !== -1) {
-            routes[index] = {
-              ...routes[index],
-              type: data.type,
-              updatedAt: new Date().toISOString()
-            };
-            updatedRoutes.push(routes[index]);
-          }
-        });
+        await Route.updateMany(
+          { _id: { $in: routeIds } },
+          { $set: { type: data.type } }
+        );
+        
+        const updatedTypeRoutes = await Route.find({ _id: { $in: routeIds } });
+        updatedRoutes = updatedTypeRoutes.map(formatRoute);
         break;
         
       default:
@@ -602,6 +559,36 @@ router.post('/routes/bulk', (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to perform bulk operation',
+      error: error.message
+    });
+  }
+});
+
+// Seed default routes (optional endpoint for initial setup)
+router.post('/routes/seed', async (req, res) => {
+  try {
+    const existingCount = await Route.countDocuments({});
+    
+    if (existingCount > 0) {
+      return res.json({
+        success: true,
+        message: 'Routes already exist in database. Skipping seed.',
+        existingCount
+      });
+    }
+    
+    const seededRoutes = await Route.insertMany(defaultRoutes);
+    
+    res.json({
+      success: true,
+      message: `Successfully seeded ${seededRoutes.length} default routes`,
+      count: seededRoutes.length
+    });
+  } catch (error) {
+    console.error('Error seeding routes:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to seed routes',
       error: error.message
     });
   }
